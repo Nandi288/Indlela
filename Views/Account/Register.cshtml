@@ -4,6 +4,15 @@
     var provinces = Enum.GetValues<SaProvince>();
 }
 
+@* The browser draws dropdown lists itself; give the options readable colours on the dark design. *@
+@section Head {
+    <style>
+        .app-body select { background-color: #0E3A2C; color: #F4F1E8; }
+        .app-body select option { background-color: #0E3A2C; color: #F4F1E8; }
+        .app-body select option:checked { background-color: #E8B04B; color: #17150D; }
+    </style>
+}
+
 <div class="ip-page ip-page-narrow">
     <div class="ip-head">
         <div>

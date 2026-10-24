@@ -1,0 +1,172 @@
+@model CourseCatalogVm
+@{
+    ViewData["Title"] = "Free courses";
+    var f = Model.Filter;
+
+    // Pager links keep every filter in the query string (bookmarkable, UC-05).
+    Dictionary<string, string> RouteFor(int page)
+    {
+        var all = new Dictionary<string, string?>
+        {
+            ["q"] = f.Q, ["nqf"] = f.Nqf?.ToString(), ["provider"] = f.Provider, ["category"] = f.Category,
+            ["mode"] = f.Mode?.ToString(), ["accredited"] = f.Accredited?.ToString().ToLowerInvariant(),
+            ["page"] = page.ToString()
+        };
+        return all.Where(kv => !string.IsNullOrEmpty(kv.Value)).ToDictionary(kv => kv.Key, kv => kv.Value!);
+    }
+    ViewData["SearchEventId"] = Model.SearchEventId;
+}
+
+@* One GET form wraps the hero search and the filter panel, so every search is a bookmarkable URL. *@
+<form class="ip-page" method="get" action="/courses">
+
+    <div class="ip-head">
+        <div>
+            <p class="ip-greet">Explore</p>
+            <h1 class="ip-title">Free courses</h1>
+        </div>
+        <a class="ip-btn ip-btn-line" href="/courses?mode=InApp">Courses you can learn here</a>
+    </div>
+
+    @* ---------- Green hero: search + categories ---------- *@
+    <section class="ip-card ip-hero" aria-labelledby="find-title">
+        <div class="ip-hero-strand" aria-hidden="true"></div>
+        <div class="ip-hero-body">
+            <h2 id="find-title" class="ip-hero-title">Find your next bead on the path</h2>
+            <p class="ip-hero-text">Every course here is free. Filter by NQF level, provider or topic, then learn here or continue on the provider's site.</p>
+            <div class="ip-hero-search" role="search">
+                <label for="q" class="sr-only">Keywords</label>
+                <input id="q" type="search" name="q" value="@f.Q" placeholder="Try: C# beginner, cloud, NQF 5" autocomplete="off" />
+                <button type="submit" class="ip-btn ip-btn-gold ip-btn-big">Search</button>
+            </div>
+            @if (Model.Categories.Count > 0)
+            {
+                <ul class="ip-chips" style="margin-top:16px" aria-label="Browse by category">
+                    <li><a class="ip-chip" href="/courses" aria-current="@(f.Category is null ? "true" : null)">All</a></li>
+                    @foreach (var c in Model.Categories)
+                    {
+                        <li><a class="ip-chip" href="/courses?category=@Uri.EscapeDataString(c)" aria-current="@(f.Category == c ? "true" : null)">@c</a></li>
+                    }
+                </ul>
+            }
+        </div>
+    </section>
+
+    <div class="ip-with-filters">
+        @* ---------- Filters ---------- *@
+        <section class="ip-card ip-filters" aria-labelledby="filters-title">
+            <h2 id="filters-title">Filter courses</h2>
+
+            <div class="field">
+                <label for="nqf">NQF level</label>
+                <select id="nqf" name="nqf">
+                    <option value="">Any level</option>
+                    @for (var level = 1; level <= 10; level++)
+                    {
+                        <option value="@level" selected="@(f.Nqf == level)">NQF @level</option>
+                    }
+                </select>
+            </div>
+
+            <div class="field">
+                <label for="category">Category</label>
+                <select id="category" name="category">
+                    <option value="">All categories</option>
+                    @foreach (var c in Model.Categories)
+                    {
+                        <option value="@c" selected="@(f.Category == c)">@c</option>
+                    }
+                </select>
+            </div>
+
+            <div class="field">
+                <label for="provider">Provider</label>
+                <select id="provider" name="provider">
+                    <option value="">All providers</option>
+                    @foreach (var p in Model.Providers)
+                    {
+                        <option value="@p" selected="@(f.Provider == p)">@p</option>
+                    }
+                </select>
+            </div>
+
+            <div class="field">
+                <label for="mode">Where you learn</label>
+                <select id="mode" name="mode">
+                    <option value="">Anywhere</option>
+                    <option value="InApp" selected="@(f.Mode == DeliveryMode.InApp)">Learn here</option>
+                    <option value="External" selected="@(f.Mode == DeliveryMode.External)">On provider site</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label for="accredited">Accreditation</label>
+                <select id="accredited" name="accredited">
+                    <option value="">Accredited or not</option>
+                    <option value="true" selected="@(f.Accredited == true)">Accredited (NQF / SETA)</option>
+                    <option value="false" selected="@(f.Accredited == false)">Non-accredited</option>
+                </select>
+            </div>
+
+            <div class="ip-actions-col">
+                <button type="submit" class="ip-btn ip-btn-green">Show courses</button>
+                @if (f.HasAnyFilter)
+                {
+                    <a class="ip-btn ip-btn-quiet" href="/courses">Clear all filters</a>
+                }
+            </div>
+        </section>
+
+        @* ---------- Results ---------- *@
+        <section class="ip-stack" aria-labelledby="results-title">
+            <div class="ip-panel-head">
+                <h2 id="results-title" class="ip-h2">
+                    @Model.TotalCount @(Model.TotalCount == 1 ? "course" : "courses")
+                    @if (!string.IsNullOrWhiteSpace(f.Q))
+                    {
+                        <text>for “@f.Q”</text>
+                    }
+                </h2>
+                @if (Model.TotalPages > 1)
+                {
+                    <span class="ip-muted">Page @f.Page of @Model.TotalPages</span>
+                }
+            </div>
+
+            @if (Model.Courses.Count == 0)
+            {
+                <div class="ip-card ip-empty">
+                    <h3>No courses match yet</h3>
+                    <p class="ip-muted">Try removing a filter or using a broader word, like “programming” instead of a language name.</p>
+                    <div class="btn-row" style="margin-top:16px"><a class="ip-btn ip-btn-gold" href="/courses">Show all courses</a></div>
+                </div>
+            }
+            else
+            {
+                <ul class="ip-course-grid">
+                    @foreach (var course in Model.Courses)
+                    {
+                        <li><partial name="_CourseCard" model="course" view-data="ViewData" /></li>
+                    }
+                </ul>
+
+                @if (Model.TotalPages > 1)
+                {
+                    <nav class="ip-pager" aria-label="Pages">
+                        @if (f.Page > 1)
+                        {
+                            <a class="ip-btn ip-btn-line" asp-action="Index" asp-all-route-data="RouteFor(f.Page - 1)" rel="prev">← Previous</a>
+                        }
+                        else { <span></span> }
+                        <span class="ip-muted">Page @f.Page of @Model.TotalPages</span>
+                        @if (f.Page < Model.TotalPages)
+                        {
+                            <a class="ip-btn ip-btn-line" asp-action="Index" asp-all-route-data="RouteFor(f.Page + 1)" rel="next">Next →</a>
+                        }
+                        else { <span></span> }
+                    </nav>
+                }
+            }
+        </section>
+    </div>
+</form>

@@ -1,0 +1,100 @@
+@model JobsPageVm
+@{
+    ViewData["Title"] = "Jobs";
+}
+
+@functions {
+    private static string BandTag(JobMatchVm m) => m.Band switch { "now" => "green", "close" => "gold", _ => "" };
+}
+
+<div class="ix-page">
+    <div class="ix-head">
+        <div>
+            <p class="ix-kicker">Job matching</p>
+            <h1 class="ix-title">Jobs that match your skills</h1>
+            <p class="ix-lede">
+                @if (!Model.IsSignedIn)
+                {
+                    <text>These are the entry-level roles Indlela prepares you for. Create a free account and your matches update as you learn.</text>
+                }
+                else if (Model.SkillCount == 0)
+                {
+                    <text>Finish your first roadmap step and your matches start to fill in. Every skill you prove moves you closer.</text>
+                }
+                else
+                {
+                    <text>Based on the @Model.SkillCount skill@(Model.SkillCount == 1 ? "" : "s") you've proven on Indlela. Learn a missing skill and your match goes up.</text>
+                }
+            </p>
+        </div>
+        @if (!Model.IsSignedIn)
+        {
+            <a class="ix-btn-gold" href="/account/register">Start learning free</a>
+        }
+        else
+        {
+            <a class="ix-btn-line" href="/portfolio">My portfolio</a>
+        }
+    </div>
+
+    @foreach (var (title, items) in new[] { ("You can do these now", Model.Now), ("You're close", Model.Close), (Model.IsSignedIn && Model.SkillCount > 0 ? "Worth exploring" : "Roles Indlela prepares you for", Model.Explore) })
+    {
+        var list = items.ToList();
+        if (list.Count == 0) { continue; }
+        <section>
+            <h2 class="ix-title" style="font-size:1.5rem;margin-bottom:14px">@title</h2>
+            <div class="ix-grid">
+                @foreach (var m in list)
+                {
+                    <article class="ix-glass jb">
+                        <div class="jb-top">
+                            <div>
+                                <span class="ix-tag @BandTag(m)">@m.BandLabel</span>
+                                <h3 style="margin-top:8px">@m.Role.Title</h3>
+                            </div>
+                            @if (Model.IsSignedIn)
+                            {
+                                <span class="jb-pct">@m.Percent%</span>
+                            }
+                        </div>
+                        <p class="ix-muted" style="margin:0">@m.Role.Summary</p>
+                        @if (Model.IsSignedIn)
+                        {
+                            <div class="ix-bar" role="img" aria-label="@m.Percent% of the skills"><span style="width:@m.Percent%"></span></div>
+                        }
+                        @if (m.Have.Count > 0)
+                        {
+                            <div class="jb-skills" aria-label="Skills you have">
+                                @foreach (var s in m.Have) { <span class="ix-tag green">✓ @s</span> }
+                            </div>
+                        }
+                        @if (m.Missing.Count > 0)
+                        {
+                            <div class="jb-skills" aria-label="Skills to learn">
+                                @foreach (var s in m.Missing)
+                                {
+                                    @if (s.PathSlug is not null)
+                                    {
+                                        <a class="ix-tag" href="/paths/@s.PathSlug" title="Learn it on @s.PathName" style="text-decoration:none">+ @s.Skill</a>
+                                    }
+                                    else
+                                    {
+                                        <span class="ix-tag">+ @s.Skill</span>
+                                    }
+                                }
+                            </div>
+                        }
+                        <p class="ix-muted" style="margin:0;font-size:.88rem">@m.Role.OpeningTypes</p>
+                        <div class="jb-links">
+                            <a href="@m.IndeedUrl" target="_blank" rel="noopener">Openings on Indeed ↗</a>
+                            <a href="@m.LinkedInUrl" target="_blank" rel="noopener">LinkedIn ↗</a>
+                            <a href="https://sayouth.mobi" target="_blank" rel="noopener">SAYouth ↗</a>
+                        </div>
+                    </article>
+                }
+            </div>
+        </section>
+    }
+
+    <p class="ix-muted" style="margin:0;font-size:.9rem">Openings link to trusted job sites. Never pay anyone to get a job or a learnership: real employers don't ask for money.</p>
+</div>

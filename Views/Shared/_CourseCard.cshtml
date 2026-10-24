@@ -1,0 +1,33 @@
+@model CourseCardVm
+@{
+    var sid = ViewData["SearchEventId"] as long?;
+    var dot = Model.LearnHere ? "" : "provider";
+}
+@* Design 2 course card: diamond + category, title (whole card clickable), tinted pills, hours and accreditation. *@
+<article class="ip-card ip-course">
+    <div class="ip-course-top">
+        <span class="ip-dot @dot" aria-hidden="true"></span>
+        <span>@Model.Category</span>
+    </div>
+    <h3><a asp-controller="Courses" asp-action="Details" asp-route-id="@Model.Id" asp-route-slug="@Model.Slug" asp-route-sid="@sid">@Model.Title</a></h3>
+    <p class="ip-muted">@Model.Provider</p>
+    <div class="ip-course-pills">
+        <span class="ip-pill @(Model.NqfLevel is null ? "ip-pill-self" : "ip-pill-line")">@Model.NqfLabel</span>
+        @if (Model.IsFree)
+        {
+            <span class="ip-pill ip-pill-gold">Free</span>
+        }
+        @if (Model.LearnHere)
+        {
+            <span class="ip-pill ip-pill-here">Learn here</span>
+        }
+        else
+        {
+            <span class="ip-pill ip-pill-provider">On provider <span aria-hidden="true">↗</span></span>
+        }
+    </div>
+    <div class="ip-course-foot">
+        <span>@(Model.EstimatedHours is int h ? $"{h} hours" : "Self-paced")</span>
+        <b>@(Model.AccreditationBody ?? "View course →")</b>
+    </div>
+</article>

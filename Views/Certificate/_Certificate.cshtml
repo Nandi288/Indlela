@@ -1,0 +1,29 @@
+@model Indlela.Controllers.CertificateVm
+<article class="ip-cert" aria-label="Certificate of achievement">
+    <div class="ip-hero-strand" aria-hidden="true"></div>
+    <div class="ip-cert-body">
+        <div class="ip-cert-brand">
+            <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#0B5D3B" /><path d="M9 26c0-6 14-6 14-12S13 8 13 5" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" /><circle cx="13" cy="5" r="2.6" fill="#F2A900" /></svg>
+            <span>Indlela</span>
+        </div>
+        <p class="ip-cert-kicker">Certificate of achievement</p>
+        <p class="ip-cert-small">This certifies that</p>
+        <p class="ip-cert-name">@Model.LearnerName</p>
+        <p class="ip-cert-small">has successfully completed</p>
+        <p class="ip-cert-course">@Model.CourseTitle</p>
+        <p class="ip-cert-small">offered by <strong>@Model.Provider</strong>@(Model.EstimatedHours is int h ? $" · about {h} hours of learning" : "")</p>
+
+        <div class="ip-cert-seal @(Model.IsVerified ? null : "self")">
+            <span class="ip-diamond @(Model.IsVerified ? "tone-1" : "")" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10" /></svg></span>
+            <span>@Model.VerifiedBy</span>
+        </div>
+
+        <dl class="ip-cert-meta">
+            <div><dt>Completed</dt><dd>@Model.CompletedAt.ToLocalTime().ToString("d MMMM yyyy")</dd></div>
+            <div><dt>Certificate</dt><dd>@Model.ShortCode</dd></div>
+            <div><dt>Verify at</dt><dd class="ip-cert-url">@Model.VerifyUrl</dd></div>
+        </dl>
+        <p class="ip-cert-disclaimer">Indlela recognition of learning. This is not an accredited qualification; accreditation, where it exists, is awarded by the course provider or SETA.</p>
+    </div>
+    <div class="ip-hero-strand" aria-hidden="true"></div>
+</article>

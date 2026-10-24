@@ -1,0 +1,36 @@
+@model LoginVm
+@{
+    ViewData["Title"] = "Log in";
+}
+
+<div class="ip-page ip-page-narrow">
+    <div class="ip-head">
+        <div>
+            <p class="ip-greet">Welcome back</p>
+            <h1 class="ip-title">Log in to your path</h1>
+        </div>
+    </div>
+
+    <form method="post" asp-action="Login" class="ip-card" style="overflow:hidden" novalidate>
+        <div class="ip-hero-strand" aria-hidden="true"></div>
+        <div class="ip-form">
+        <input type="hidden" asp-for="ReturnUrl" />
+        <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
+
+        <div class="field">
+            <label asp-for="Email"></label>
+            <input asp-for="Email" type="email" autocomplete="email" style="width:100%" />
+            <span asp-validation-for="Email" class="field-validation-error"></span>
+        </div>
+        <div class="field">
+            <label asp-for="Password"></label>
+            <input asp-for="Password" autocomplete="current-password" style="width:100%" />
+            <span asp-validation-for="Password" class="field-validation-error"></span>
+        </div>
+        <label class="ip-check"><input asp-for="RememberMe" /> <span>Keep me signed in</span></label>
+
+        <button type="submit" class="ip-btn ip-btn-gold ip-btn-big" style="width:100%">Log in</button>
+        <p class="ip-muted" style="margin-top:14px;text-align:center">New to Indlela? <a asp-action="Register" asp-route-returnUrl="@Model.ReturnUrl">Create a free account</a></p>
+        </div>
+    </form>
+</div>

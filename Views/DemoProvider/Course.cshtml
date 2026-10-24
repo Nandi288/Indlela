@@ -1,0 +1,123 @@
+@model Indlela.Controllers.ProviderCourseVm
+@{
+    Layout = "~/Views/DemoProvider/_ProviderLayout.cshtml";
+    var c = Model.Course;
+    ViewData["Title"] = c.Title;
+    ViewData["Provider"] = c.Provider;
+    // "Back to Indlela" returns to this course on Indlela, where the synced progress shows.
+    ViewData["BackUrl"] = $"/courses/{c.Id}";
+    ViewData["BackLabel"] = "Back to this course on Indlela";
+    var e = Model.Enrollment;
+    var enrolled = e?.HandoffStatus == HandoffStatus.Enrolled;
+    var pct = e?.CurrentPercentage ?? 0;
+    var total = Model.Modules.Length;
+}
+
+@* ---------- Course hero ---------- *@
+<section class="card hero" aria-labelledby="course-title">
+    <p class="kicker">@c.Category course</p>
+    <h1 id="course-title">@c.Title</h1>
+    @if (!string.IsNullOrWhiteSpace(c.Description))
+    {
+        <p>@c.Description</p>
+    }
+    <ul class="chips" aria-label="Course details">
+        @if (c.NqfLevel is int n)
+        {
+            <li>NQF @n</li>
+        }
+        @if (c.AccreditationBody is { } body)
+        {
+            <li>@body</li>
+        }
+        <li>@total modules</li>
+        @if (c.EstimatedHours is int h)
+        {
+            <li>About @h hours</li>
+        }
+        @if (c.IsFree)
+        {
+            <li>Free</li>
+        }
+    </ul>
+</section>
+
+@if (!enrolled)
+{
+    <section class="card" style="max-width:640px">
+        @if (e is not null)
+        {
+            <h2>Finish registering</h2>
+            <p class="muted" style="margin-top:0">You started signing up from Indlela. Finish the form to unlock the modules.</p>
+            <a class="btn" href="/demo-provider/signup?provider=@Indlela.Services.Demo.DemoSetup.Slug(c.Provider)">Finish registering</a>
+        }
+        else
+        {
+            <h2>You're not registered yet</h2>
+            <p class="muted" style="margin-top:0">Start from Indlela so your sign-up is pre-filled.</p>
+            <a class="btn" href="/courses/@c.Id">Find it on Indlela</a>
+        }
+    </section>
+}
+else
+{
+    <div class="cols">
+        <div>
+            @if (e!.IsCompleted)
+            {
+                <section class="card done-card" aria-labelledby="done-title">
+                    <h2 id="done-title">Congratulations — you finished this course!</h2>
+                    <p style="margin:0">Indlela received your completion as verified progress. Your certificate of achievement is waiting there.</p>
+                    <div class="btns">
+                        <a class="btn" href="/certificate/@e.Id">View certificate on Indlela</a>
+                        <a class="btn ghost" href="/dashboard">See my path</a>
+                    </div>
+                </section>
+            }
+
+            <section class="card" aria-labelledby="mods-title">
+                <h2 id="mods-title">Modules</h2>
+                <ol class="mods">
+                    @for (var i = 1; i <= total; i++)
+                    {
+                        var done = i <= Model.DoneCount;
+                        var next = i == Model.DoneCount + 1;
+                        var last = i == total;
+                        <li class="@(done ? "done" : next ? "next" : "locked")">
+                            <span class="n" aria-hidden="true">@(done ? "✓" : i.ToString())</span>
+                            <span class="t">
+                                @Model.Modules[i - 1]
+                                <small>@(last ? "Pass to finish the course" : $"Module {i} of {total}")</small>
+                            </span>
+                            @if (done)
+                            {
+                                <span class="state">Completed</span>
+                            }
+                            else if (next)
+                            {
+                                <form method="post" asp-action="CompleteModule" asp-route-slug="@c.Slug">
+                                    <input type="hidden" name="module" value="@i" />
+                                    <button type="submit" class="btn">@(last ? "Pass final assessment" : "Complete module")</button>
+                                </form>
+                            }
+                            else
+                            {
+                                <span class="state">🔒 Locked</span>
+                            }
+                        </li>
+                    }
+                </ol>
+            </section>
+        </div>
+
+        @* ---------- Progress + the way back to Indlela ---------- *@
+        <aside class="card side" aria-labelledby="prog-title">
+            <h2 id="prog-title" class="muted" style="font-size:.85rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Your progress</h2>
+            <div class="big">@pct%</div>
+            <div class="bar" role="progressbar" aria-valuenow="@pct" aria-valuemin="0" aria-valuemax="100" aria-label="Your progress"><span style="width:@pct%"></span></div>
+            <p class="muted" style="margin:0;font-size:.9rem">@Model.DoneCount of @total modules complete</p>
+            <a class="btn ghost block" style="margin-top:16px" href="/courses/@c.Id">Return to Indlela</a>
+            <p class="sync"><i aria-hidden="true"></i>Linked to Indlela · progress syncs automatically</p>
+        </aside>
+    </div>
+}

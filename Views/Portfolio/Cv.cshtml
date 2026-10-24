@@ -1,0 +1,91 @@
+@model PortfolioVm
+@{
+    Layout = null; // a clean one-page CV, printed or saved as PDF from the browser
+    var p = Model.Profile;
+}
+<!DOCTYPE html>
+<html lang="en-ZA">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@Model.FullName · CV</title>
+    <style>
+        @@page { size: A4; margin: 14mm; }
+        body { font: 10.5pt/1.5 "Segoe UI", Arial, sans-serif; color: #17201B; margin: 0; background: #fff; }
+        .cv { max-width: 760px; margin: 0 auto; padding: 24px; }
+        .top { border-bottom: 3px solid #E8B04B; padding-bottom: 12px; margin-bottom: 14px; }
+        h1 { font: 600 24pt/1.1 Georgia, serif; margin: 0; color: #0A2A20; }
+        .head { color: #4A5650; margin: 4px 0 0; }
+        h2 { font: 600 12pt Georgia, serif; color: #0A2A20; margin: 16px 0 6px; border-bottom: 1px solid #DCE3DE; padding-bottom: 3px; }
+        table { width: 100%; border-collapse: collapse; }
+        td { padding: 4px 0; vertical-align: top; border-bottom: 1px solid #EEF1EE; }
+        .proof { white-space: nowrap; text-align: right; color: #0B5D3B; font-weight: 600; font-size: 9pt; }
+        .src { color: #5B6470; font-size: 9pt; }
+        .foot { margin-top: 18px; font-size: 8.5pt; color: #5B6470; }
+        .bar { display: flex; gap: 10px; justify-content: center; padding: 14px; background: #0A2A20; }
+        .bar a, .bar button { font: 600 11pt Arial; padding: 10px 18px; border-radius: 999px; border: 0; cursor: pointer; text-decoration: none; }
+        .bar button { background: #F0B43C; color: #17150D; }
+        .bar a { color: #F4F1E8; border: 1px solid #E8B04B; }
+        @@media print { .bar { display: none; } }
+    </style>
+</head>
+<body>
+    <div class="bar"><button type="button" onclick="window.print()">Save as PDF / print</button><a href="/portfolio">Back to my portfolio</a></div>
+    <div class="cv">
+        <div class="top">
+            <h1>@Model.FullName</h1>
+            <p class="head">@(p.Headline ?? "Skills verified on Indlela")@(p.Location is null ? "" : $" · {p.Location}")</p>
+            <p class="head">@Model.Email@(Model.Phone is null ? "" : $" · {Model.Phone}")</p>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(p.About))
+        {
+            <h2>Profile</h2>
+            <p style="margin:0;white-space:pre-line">@p.About</p>
+        }
+
+        <h2>Skills and proof</h2>
+        @if (Model.Skills.Count == 0)
+        {
+            <p class="src">Skills appear here as roadmap steps are completed on Indlela.</p>
+        }
+        else
+        {
+            <table>
+                @foreach (var s in Model.Skills)
+                {
+                    <tr>
+                        <td><b>@s.Skill</b><br /><span class="src">@s.Source@(s.Link is null ? "" : $" · {s.Link}")</span></td>
+                        <td class="proof">@s.ProofLabel</td>
+                    </tr>
+                }
+            </table>
+        }
+
+        @if (Model.Courses.Count > 0)
+        {
+            <h2>Courses completed</h2>
+            <table>
+                @foreach (var c in Model.Courses)
+                {
+                    <tr><td>@c.Title <span class="src">· @c.Provider</span></td><td class="proof">@(c.Verified ? "Verified" : "Self-reported")@(c.Date is DateTime d ? $" · {d:MMM yyyy}" : "")</td></tr>
+                }
+            </table>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(p.InformalExperience))
+        {
+            <h2>Experience</h2>
+            <p style="margin:0;white-space:pre-line">@p.InformalExperience</p>
+        }
+
+        @if (Model.Badges.Count > 0)
+        {
+            <h2>Badges</h2>
+            <p style="margin:0">@string.Join(" · ", Model.Badges.Select(b => b.Name))</p>
+        }
+
+        <p class="foot">"Verified" skills were proven by an Indlela quiz or synced from the course provider. Portfolio: @(p.IsPublic ? Model.ShareUrl : "available on request")</p>
+    </div>
+</body>
+</html>

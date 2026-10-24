@@ -1,0 +1,124 @@
+@model CourseReviewVm
+@{
+    ViewData["Title"] = $"Review: {Model.Title}";
+}
+
+<div class="ip-page">
+    <p class="ip-crumb"><a asp-action="Index">← Course pipeline</a></p>
+
+    <div class="ip-head">
+        <div>
+            <p class="ip-greet">@(Model.IsPublished ? "Published" : "Review")</p>
+            <h1 class="ip-title">Check before it goes live</h1>
+            <p class="ip-lede">Compare every field with the source page. Only set the NQF level and accreditation if the page states them.</p>
+        </div>
+        <a class="ip-btn ip-btn-line" href="@Model.OriginalUrl" target="_blank" rel="noopener noreferrer">Open source page ↗</a>
+    </div>
+
+    <form method="post" asp-action="Review" asp-route-id="@Model.Id" novalidate>
+        <div asp-validation-summary="All" class="ip-note" style="margin-bottom:16px"></div>
+
+        <div class="ip-with-side">
+            <div class="ip-stack">
+                <fieldset class="ip-fieldset">
+                    <legend>The course</legend>
+                    <div class="field">
+                        <label asp-for="Title"></label>
+                        <input asp-for="Title" style="width:100%" />
+                    </div>
+                    <div class="ip-form-grid">
+                        <div class="field">
+                            <label asp-for="Provider"></label>
+                            <input asp-for="Provider" style="width:100%" />
+                        </div>
+                        <div class="field">
+                            <label asp-for="Category"></label>
+                            <select asp-for="Category" style="width:100%">
+                                @foreach (var cat in CourseReviewVm.Categories)
+                                {
+                                    <option value="@cat">@cat</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label asp-for="Description"></label>
+                        <textarea asp-for="Description" rows="5" style="width:100%"></textarea>
+                    </div>
+                    <div class="ip-form-grid">
+                        <div class="field">
+                            <label asp-for="EstimatedHours"></label>
+                            <input asp-for="EstimatedHours" type="number" min="1" max="5000" style="width:100%" />
+                        </div>
+                        <div class="field">
+                            <label asp-for="Language"></label>
+                            <input asp-for="Language" style="width:100%" />
+                        </div>
+                    </div>
+                    <label class="ip-check"><input asp-for="IsFree" /> <span>Free for learners <strong>(required to publish)</strong></span></label>
+                </fieldset>
+
+                <fieldset class="ip-fieldset">
+                    <legend>Accreditation (only if stated on the source)</legend>
+                    <div class="ip-form-grid">
+                        <div class="field">
+                            <label asp-for="NqfLevel"></label>
+                            <select asp-for="NqfLevel" style="width:100%">
+                                <option value="">Not stated</option>
+                                @for (var n = 1; n <= 10; n++)
+                                {
+                                    <option value="@n">NQF @n</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label asp-for="Credits"></label>
+                            <input asp-for="Credits" type="number" min="1" max="999" style="width:100%" />
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label asp-for="AccreditationBody"></label>
+                        <input asp-for="AccreditationBody" style="width:100%" />
+                    </div>
+                    <label class="ip-check"><input asp-for="IsAccredited" /> <span>Accredited — I checked the claim on the source page</span></label>
+                </fieldset>
+            </div>
+
+            <aside class="ip-stack">
+                <section class="ip-card ip-card-pad">
+                    <h2 class="ip-h2">Delivery &amp; licence</h2>
+                    <div class="field">
+                        <label asp-for="LicenceType"></label>
+                        <input asp-for="LicenceType" placeholder="e.g. CC BY 4.0, All rights reserved" style="width:100%" />
+                    </div>
+                    <div class="field">
+                        <label asp-for="DeliveryMode"></label>
+                        <select asp-for="DeliveryMode" style="width:100%">
+                            <option value="External">On provider (handoff)</option>
+                            <option value="InApp">Learn here (openly licensed only)</option>
+                        </select>
+                    </div>
+                    <label class="ip-check"><input asp-for="HasWrittenAgreement" /> <span>A written agreement with the provider is on file</span></label>
+                </section>
+
+                <section class="ip-card ip-card-pad">
+                    <h2 class="ip-h2">Decision</h2>
+                    <p class="ip-muted" style="margin-bottom:14px">Source: <a href="@Model.OriginalUrl" target="_blank" rel="noopener noreferrer" style="overflow-wrap:anywhere">@Model.OriginalUrl</a></p>
+                    <div class="ip-actions-col">
+                        @if (Model.IsPublished)
+                        {
+                            <button type="submit" name="decision" value="save" class="ip-btn ip-btn-gold ip-btn-big">Save changes</button>
+                            <button type="submit" name="decision" value="unpublish" class="ip-btn ip-btn-line">Unpublish</button>
+                        }
+                        else
+                        {
+                            <button type="submit" name="decision" value="publish" class="ip-btn ip-btn-gold ip-btn-big">Publish to Explore</button>
+                            <button type="submit" name="decision" value="save" class="ip-btn ip-btn-line">Save draft</button>
+                            <button type="submit" name="decision" value="reject" class="ip-btn ip-btn-quiet" formnovalidate>Reject and remove</button>
+                        }
+                    </div>
+                </section>
+            </aside>
+        </div>
+    </form>
+</div>

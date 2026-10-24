@@ -1,0 +1,55 @@
+/* ==========================================================================
+   Option C — "Savanna Sunset": terracotta and ochre on warm sand, with a charcoal sidebar.
+   Fonts: Fraunces (headings, warm serif) + DM Sans (body). Background: images/themes/savanna.svg.
+   ========================================================================== */
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,800&display=swap");
+
+:root {
+  --font-head: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-body: "DM Sans", system-ui, "Segoe UI", Roboto, Arial, sans-serif;
+
+  --bg: #FBF6F0;          --app-bg: #F4EBE1;
+  --surface: #FFFFFF;     --surface-2: #F6EEE5;
+  --border: #EADFD3;      --border-strong: #D8C7B6;
+  --ink: #2A1D17;         --muted: #6E5A4E;
+
+  --primary: #C2410C;     --primary-hover: #9A3412;   --primary-tint: #FDEBDD;  --on-primary: #FFFFFF;
+  --gold: #F2B134;        --gold-hover: #E09E1C;      --gold-tint: #FFF4DA;     --on-gold: #2A1D17;  --gold-ink: #7A4E00;
+  --info: #0F766E;        --info-tint: #E2F4F1;       --info-ink: #0B5A54;
+  --danger: #B42318;      --danger-tint: #FDECEA;     --danger-ink: #8E1B14;
+  --bead-blue: var(--info); --bead-red: #9F1239;
+  --focus-ring: rgba(194, 65, 12, .25);
+  --shadow-color: rgba(194, 65, 12, .14);
+
+  --app-side: #2A1D17;    --app-side-deep: #1E140F;   --app-side-text: #F3E6DA;  --app-side-muted: #CDB7A5;
+  --hero-bg: #5A2410;     --hero-text-soft: #FBE3CF;
+  --strand: repeating-linear-gradient(90deg, #C2410C 0 10px, transparent 10px 12px, #F2B134 12px 22px, transparent 22px 24px,
+            #FFFFFF 24px 34px, transparent 34px 36px, #0F766E 36px 46px, transparent 46px 48px, #2A1D17 48px 58px, transparent 58px 60px);
+
+  --page-image: url("../../images/themes/savanna.svg");
+  --page-veil: rgba(251, 246, 240, .87);
+  --main-bg: rgba(255, 252, 248, .88);
+  --hero-image: url("../../images/themes/savanna.svg");
+  --hero-veil-1: rgba(40, 14, 6, .86);  --hero-veil-2: rgba(40, 14, 6, .15);
+}
+
+html[data-theme="dark"] {
+  --bg: #15100C;          --app-bg: #100C09;
+  --surface: #211812;     --surface-2: #2B2018;
+  --border: #3A2B21;      --border-strong: #574131;
+  --ink: #F3E9DF;         --muted: #BCA898;
+
+  --primary: #FB923C;     --primary-hover: #FDBA74;   --primary-tint: #3A2416;  --on-primary: #2A1205;
+  --gold: #F5C04A;        --gold-hover: #F8D27A;      --gold-tint: #3A2E14;     --on-gold: #2A1D17;  --gold-ink: #F8D98E;
+  --info: #2DD4BF;        --info-tint: #12302C;       --info-ink: #99F0E3;
+  --danger: #FF8A80;      --danger-tint: #3B1A1A;     --danger-ink: #FFB4AD;
+  --focus-ring: rgba(251, 146, 60, .3);
+  --shadow-color: rgba(0, 0, 0, .45);
+
+  --app-side: #120D0A;    --app-side-deep: #0C0806;   --app-side-text: #EADBCD;  --app-side-muted: #B39C8B;
+  --hero-bg: #3A170A;     --hero-text-soft: #F6D9C2;
+
+  --page-veil: rgba(16, 12, 9, .84);
+  --main-bg: rgba(21, 16, 12, .86);
+  --hero-veil-1: rgba(20, 8, 3, .9);    --hero-veil-2: rgba(20, 8, 3, .3);
+}

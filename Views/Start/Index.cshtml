@@ -1,0 +1,92 @@
+@model SmartStartInput
+@{
+    ViewData["Title"] = "Smart Start";
+
+    // (value, label, hint) for each question
+    var interests = new[] { ("tech", "Building things with technology", "Apps, websites, fixing computers"), ("people", "Creating content and working with people", "Social media, marketing, customers"), ("numbers", "Working with numbers and money", "Bookkeeping, finance, spreadsheets"), ("unsure", "I'm not sure yet", "Help me choose") };
+    var education = new[] { ("school", "Still in high school", ""), ("matric", "Finished matric", ""), ("college", "TVET or college", ""), ("university", "University", ""), ("working", "Already working", "") };
+    var experience = new[] { ("none", "None yet", "I'm starting from zero"), ("some", "A little", "I've tried a course or two"), ("lots", "Quite a lot", "I've done real work in this area") };
+    var hours = new[] { (2, "About 2 hours"), (5, "About 5 hours"), (10, "About 10 hours"), (15, "15 hours or more") };
+    var internet = new[] { ("wifi", "Home Wi-Fi or uncapped", ""), ("prepaid", "Prepaid data bundles", ""), ("community", "Free community Wi-Fi", "Library, campus, hotspot") };
+    var goals = new[] { ("first-job", "My first job", ""), ("learnership", "A learnership or internship", ""), ("better-job", "A better job", "I'm working and want to move up"), ("own-business", "My own business or freelancing", "") };
+}
+
+<div class="ix-page" style="max-width:920px;margin:0 auto">
+    <div>
+        <p class="ix-kicker">Smart Start · 6 quick questions</p>
+        <h1 class="ix-title">Let's build your roadmap.</h1>
+        <p class="ix-lede">Answer six questions and Indlela will recommend the career path that fits you, paced to your time and your data.</p>
+    </div>
+
+    <form method="post" class="ix-page" style="padding:0;gap:22px">
+        <div asp-validation-summary="ModelOnly" class="ix-error"></div>
+
+        <fieldset class="ss-q ix-glass">
+            <legend><span class="ss-step">1</span>What do you enjoy most?</legend>
+            <div class="ss-opts">
+                @foreach (var (v, l, h) in interests)
+                {
+                    <label class="ss-opt"><input type="radio" name="Interest" value="@v" checked="@(Model.Interest == v)" /><span>@l<small>@h</small></span></label>
+                }
+            </div>
+            <span asp-validation-for="Interest" class="ix-error"></span>
+        </fieldset>
+
+        <fieldset class="ss-q ix-glass">
+            <legend><span class="ss-step">2</span>Where are you right now?</legend>
+            <div class="ss-opts">
+                @foreach (var (v, l, h) in education)
+                {
+                    <label class="ss-opt"><input type="radio" name="Education" value="@v" checked="@(Model.Education == v)" /><span>@l<small>@h</small></span></label>
+                }
+            </div>
+            <span asp-validation-for="Education" class="ix-error"></span>
+        </fieldset>
+
+        <fieldset class="ss-q ix-glass">
+            <legend><span class="ss-step">3</span>How much experience do you have in that area?</legend>
+            <div class="ss-opts">
+                @foreach (var (v, l, h) in experience)
+                {
+                    <label class="ss-opt"><input type="radio" name="Experience" value="@v" checked="@(Model.Experience == v)" /><span>@l<small>@h</small></span></label>
+                }
+            </div>
+            <span asp-validation-for="Experience" class="ix-error"></span>
+        </fieldset>
+
+        <fieldset class="ss-q ix-glass">
+            <legend><span class="ss-step">4</span>How much time can you study each week?</legend>
+            <div class="ss-opts">
+                @foreach (var (v, l) in hours)
+                {
+                    <label class="ss-opt"><input type="radio" name="HoursPerWeek" value="@v" checked="@(Model.HoursPerWeek == v)" /><span>@l</span></label>
+                }
+            </div>
+            <span asp-validation-for="HoursPerWeek" class="ix-error"></span>
+        </fieldset>
+
+        <fieldset class="ss-q ix-glass">
+            <legend><span class="ss-step">5</span>How do you usually get internet?<small>We use this to keep your roadmap light on data.</small></legend>
+            <div class="ss-opts">
+                @foreach (var (v, l, h) in internet)
+                {
+                    <label class="ss-opt"><input type="radio" name="Connectivity" value="@v" checked="@(Model.Connectivity == v)" /><span>@l<small>@h</small></span></label>
+                }
+            </div>
+            <span asp-validation-for="Connectivity" class="ix-error"></span>
+        </fieldset>
+
+        <fieldset class="ss-q ix-glass">
+            <legend><span class="ss-step">6</span>What do you want next?</legend>
+            <div class="ss-opts">
+                @foreach (var (v, l, h) in goals)
+                {
+                    <label class="ss-opt"><input type="radio" name="Goal" value="@v" checked="@(Model.Goal == v)" /><span>@l<small>@h</small></span></label>
+                }
+            </div>
+            <span asp-validation-for="Goal" class="ix-error"></span>
+        </fieldset>
+
+        <div><button type="submit" class="ix-btn-gold" style="min-height:56px;padding:0 32px;font-size:1.1rem">Show my roadmap →</button></div>
+    </form>
+</div>

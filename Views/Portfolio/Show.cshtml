@@ -1,0 +1,158 @@
+@model PortfolioVm
+@{
+    ViewData["Title"] ??= "My portfolio";
+    var p = Model.Profile;
+    var initial = Model.FullName.Length > 0 ? Model.FullName[0].ToString().ToUpperInvariant() : "I";
+    string Tone(ProofKind k) => k switch { ProofKind.Verified => "green", ProofKind.Project => "gold", ProofKind.Certificate => "blue", _ => "" };
+}
+
+<div class="ix-page">
+    @* ---------- Header ---------- *@
+    <div class="ix-glass pf-hero">
+        <div class="pf-avatar" aria-hidden="true">@initial</div>
+        <div style="flex:1;min-width:220px">
+            <p class="ix-kicker" style="margin-bottom:4px">Skills portfolio</p>
+            <h1 class="pf-name">@Model.FullName</h1>
+            <p class="ix-muted" style="margin:6px 0 0">@(p.Headline ?? "Learning on Indlela")@(p.Location is null ? "" : $" · {p.Location}")</p>
+            <p style="margin:10px 0 0;display:flex;gap:8px;flex-wrap:wrap">
+                <span class="ix-tag green">@Model.VerifiedCount verified skill@(Model.VerifiedCount == 1 ? "" : "s")</span>
+                <span class="ix-tag">@Model.Skills.Count skills in total</span>
+                <span class="ix-tag gold">@Model.Badges.Count badge@(Model.Badges.Count == 1 ? "" : "s")</span>
+            </p>
+        </div>
+        @if (Model.IsOwner)
+        {
+            <div class="no-print" style="display:flex;gap:10px;flex-wrap:wrap">
+                <a class="ix-btn-gold" href="/portfolio/cv">Download CV</a>
+                <a class="ix-btn-line" href="/jobs">See my job matches</a>
+            </div>
+        }
+    </div>
+
+    @if (Model.IsOwner)
+    {
+        <div class="pf-share no-print">
+            @if (p.IsPublic)
+            {
+                <span><b>Your public link:</b> <a href="@Model.ShareUrl">@Model.ShareUrl</a></span>
+                <span class="ix-muted">Share it with employers or add it to your CV and LinkedIn.</span>
+            }
+            else
+            {
+                <span><b>Your portfolio is private.</b> Switch on "Make my portfolio public" below to get a link you can share with employers.</span>
+            }
+        </div>
+    }
+
+    <div class="ix-two">
+        <div style="display:flex;flex-direction:column;gap:20px">
+            @if (!string.IsNullOrWhiteSpace(p.About))
+            {
+                <section class="ix-glass"><h2>About me</h2><p style="margin:0;white-space:pre-line">@p.About</p></section>
+            }
+
+            <section class="ix-glass">
+                <h2>Skills and proof</h2>
+                @if (Model.Skills.Count == 0)
+                {
+                    <p class="ix-muted" style="margin:0">No skills yet. Finish a step on your roadmap and it appears here with its proof.</p>
+                    @if (Model.IsOwner) { <p style="margin:12px 0 0"><a class="ix-btn-gold ix-btn-sm" href="/paths/mine">Go to my roadmap</a></p> }
+                }
+                else
+                {
+                    <div class="ix-list">
+                        @foreach (var s in Model.Skills)
+                        {
+                            <div class="pf-skill">
+                                <b>@s.Skill</b>
+                                <span class="ix-tag @Tone(s.Proof)">@s.ProofLabel</span>
+                                <span class="src">@s.Source@(s.Date is DateTime d ? $" · {d:d MMM yyyy}" : "")
+                                    @if (s.Link is not null) { <text> · </text><a href="@s.Link" target="_blank" rel="noopener nofollow">View proof ↗</a> }
+                                </span>
+                            </div>
+                        }
+                    </div>
+                }
+            </section>
+
+            @if (!string.IsNullOrWhiteSpace(p.InformalExperience))
+            {
+                <section class="ix-glass"><h2>Experience</h2><p style="margin:0;white-space:pre-line">@p.InformalExperience</p></section>
+            }
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:20px">
+            @if (Model.TopMatches.Count > 0)
+            {
+                <section class="ix-glass">
+                    <h2>Ready for</h2>
+                    <ul class="ix-list">
+                        @foreach (var m in Model.TopMatches)
+                        {
+                            <li style="display:flex;justify-content:space-between;gap:10px"><span>@m.Role.Title</span><b style="color:var(--ix-gold)">@m.Percent% match</b></li>
+                        }
+                    </ul>
+                </section>
+            }
+
+            @if (Model.Courses.Count > 0)
+            {
+                <section class="ix-glass">
+                    <h2>Courses completed</h2>
+                    <ul class="ix-list">
+                        @foreach (var c in Model.Courses)
+                        {
+                            <li><b>@c.Title</b><br /><span class="ix-muted" style="font-size:.9rem">@c.Provider · @(c.Verified ? "verified" : "self-reported")@(c.Date is DateTime d ? $" · {d:MMM yyyy}" : "")</span></li>
+                        }
+                    </ul>
+                </section>
+            }
+
+            @if (Model.Badges.Count > 0)
+            {
+                <section class="ix-glass">
+                    <h2>Badges</h2>
+                    <ul class="ix-list">
+                        @foreach (var b in Model.Badges)
+                        {
+                            <li><span class="ix-tag gold">@b.Name</span> <span class="ix-muted" style="font-size:.9rem">@b.Date.ToString("d MMM yyyy")</span></li>
+                        }
+                    </ul>
+                </section>
+            }
+
+            @if (Model.Email is not null || Model.Phone is not null)
+            {
+                <section class="ix-glass">
+                    <h2>Contact</h2>
+                    @if (Model.Email is not null) { <p style="margin:0"><a href="mailto:@Model.Email">@Model.Email</a></p> }
+                    @if (Model.Phone is not null) { <p style="margin:6px 0 0">@Model.Phone</p> }
+                </section>
+            }
+
+            @* ---------- Settings (owner only) ---------- *@
+            @if (Model.IsOwner)
+            {
+                <section class="ix-glass no-print">
+                    <h2>Edit my portfolio</h2>
+                    <form method="post" action="/portfolio" class="pf-form">
+                        @Html.AntiForgeryToken()
+                        <label for="pf-head">Headline</label>
+                        <input id="pf-head" type="text" name="Headline" maxlength="120" value="@p.Headline" placeholder="Aspiring junior developer" />
+                        <label for="pf-loc">Location</label>
+                        <input id="pf-loc" type="text" name="Location" maxlength="80" value="@p.Location" placeholder="Durban, KwaZulu-Natal" />
+                        <label for="pf-about">About me</label>
+                        <textarea id="pf-about" name="About" maxlength="800" placeholder="Two or three sentences about you and the work you want.">@p.About</textarea>
+                        <label for="pf-exp">Other experience</label>
+                        <textarea id="pf-exp" name="InformalExperience" maxlength="800" placeholder="Tutoring, a family business, volunteering, church or community work…">@p.InformalExperience</textarea>
+                        <label class="pf-check"><input type="checkbox" name="ShowEmail" value="true" checked="@p.ShowEmail" /> Show my email on the public page</label>
+                        <label class="pf-check"><input type="checkbox" name="ShowPhone" value="true" checked="@p.ShowPhone" /> Show my mobile number on the public page</label>
+                        <label class="pf-check"><input type="checkbox" name="IsPublic" value="true" checked="@p.IsPublic" /> <b>Make my portfolio public</b></label>
+                        <p class="ix-muted" style="font-size:.85rem;margin:8px 0 14px">Your ID number is never shown. Contact details only appear if you tick them.</p>
+                        <button type="submit" class="ix-btn-gold ix-btn-sm">Save</button>
+                    </form>
+                </section>
+            }
+        </div>
+    </div>
+</div>

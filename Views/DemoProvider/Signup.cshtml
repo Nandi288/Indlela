@@ -1,0 +1,53 @@
+@model Indlela.Controllers.ProviderSignupVm
+@{
+    Layout = "~/Views/DemoProvider/_ProviderLayout.cshtml";
+    ViewData["Title"] = "Create your account";
+    ViewData["Provider"] = Model.ProviderName;
+    if (Model.Course is not null)
+    {
+        ViewData["BackUrl"] = $"/courses/{Model.Course.Id}";
+        ViewData["BackLabel"] = "Back to this course on Indlela";
+    }
+}
+
+<div class="card" style="max-width:640px;margin:0 auto">
+    <h1>Create your free account</h1>
+    <p class="muted">@(Model.Course is null ? "Join to start learning." : $"Register to start “{Model.Course.Title}”.")</p>
+
+    @if (Model.Prefilled)
+    {
+        <div class="note">Indlela filled in your @string.Join(", ", Model.PrefilledFields) for you. Check them, choose a password and press <strong>Submit</strong>.</div>
+    }
+    else
+    {
+        <div class="note">This provider doesn't accept pre-filled links, so use Indlela's one-tap <strong>Copy</strong> buttons to fill in the form.</div>
+    }
+
+    @if (Model.EnrollmentId is null)
+    {
+        <p>Start from a course on Indlela and tap <strong>Enroll Now</strong> — that's how Indlela knows which course you're registering for.</p>
+        <a class="btn" href="/courses">Find a course on Indlela</a>
+    }
+    else
+    {
+        <form method="post" asp-action="SignupSubmit">
+            <input type="hidden" name="enrollmentId" value="@Model.EnrollmentId" />
+            <div class="grid">
+                <div>
+                    <label for="fn">First name</label>
+                    <input id="fn" type="text" required value="@Model.FirstName" class="@(string.IsNullOrEmpty(Model.FirstName) ? null : "filled")" autocomplete="given-name" />
+                </div>
+                <div>
+                    <label for="ln">Last name</label>
+                    <input id="ln" type="text" required value="@Model.LastName" class="@(string.IsNullOrEmpty(Model.LastName) ? null : "filled")" autocomplete="family-name" />
+                </div>
+            </div>
+            <label for="em">Email</label>
+            <input id="em" type="email" required value="@Model.Email" class="@(string.IsNullOrEmpty(Model.Email) ? null : "filled")" autocomplete="email" />
+            <label for="pw">Choose a password</label>
+            <input id="pw" type="password" required minlength="6" autocomplete="new-password" />
+            <p class="muted" style="font-size:.85rem;margin-top:12px">Demo only: nothing you type here is stored. Pressing Submit simulates the provider confirming your registration back to Indlela.</p>
+            <button type="submit" class="btn" style="margin-top:8px">Submit</button>
+        </form>
+    }
+</div>

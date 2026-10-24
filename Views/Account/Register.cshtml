@@ -1,0 +1,117 @@
+@model RegisterVm
+@{
+    ViewData["Title"] = "Create your free account";
+    var provinces = Enum.GetValues<SaProvince>();
+}
+
+<div class="ip-page ip-page-narrow">
+    <div class="ip-head">
+        <div>
+            <p class="ip-greet">Sawubona</p>
+            <h1 class="ip-title">Create your one profile</h1>
+            <p class="ip-lede">Fill this in once. We reuse it to pre-fill provider sign-ups, so you never type the same form again.</p>
+        </div>
+    </div>
+
+    <form method="post" asp-action="Register" class="ip-form" style="padding:0" novalidate>
+        <input type="hidden" asp-for="ReturnUrl" />
+        <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
+
+        <fieldset class="ip-fieldset">
+            <legend>About you</legend>
+            <div class="ip-form-grid">
+                <div class="field">
+                    <label asp-for="FirstName"></label>
+                    <input asp-for="FirstName" autocomplete="given-name" />
+                    <span asp-validation-for="FirstName" class="field-validation-error"></span>
+                </div>
+                <div class="field">
+                    <label asp-for="Surname"></label>
+                    <input asp-for="Surname" autocomplete="family-name" />
+                    <span asp-validation-for="Surname" class="field-validation-error"></span>
+                </div>
+            </div>
+            <div class="field">
+                <label asp-for="Email"></label>
+                <input asp-for="Email" type="email" autocomplete="email" />
+                <span asp-validation-for="Email" class="field-validation-error"></span>
+            </div>
+            <div class="ip-form-grid">
+                <div class="field">
+                    <label asp-for="MobileNumber"></label>
+                    <input asp-for="MobileNumber" type="tel" autocomplete="tel" placeholder="0821234567" />
+                    <span asp-validation-for="MobileNumber" class="field-validation-error"></span>
+                </div>
+                <div class="field">
+                    <label asp-for="Province"></label>
+                    <select asp-for="Province">
+                        <option value="">Choose your province</option>
+                        @foreach (var p in provinces)
+                        {
+                            <option value="@p">@Indlela.Services.Handoff.ShareableProfileFields.ToDisplayName(p)</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <label class="ip-check"><input asp-for="IsUnder18" /> <span>I am under 18</span></label>
+        </fieldset>
+
+        <fieldset class="ip-fieldset">
+            <legend>Your goal</legend>
+            <div class="field">
+                <label asp-for="CareerGoal"></label>
+                <textarea asp-for="CareerGoal" rows="2" placeholder="e.g. Junior .NET developer, cloud support technician"></textarea>
+                <p class="ip-hint">We use this to recommend courses.</p>
+            </div>
+            <div class="field">
+                <label asp-for="TargetSaqaNqfLevel"></label>
+                <select asp-for="TargetSaqaNqfLevel">
+                    <option value="">Not sure yet</option>
+                    @for (var level = 1; level <= 10; level++)
+                    {
+                        <option value="@level">NQF @level</option>
+                    }
+                </select>
+                <p class="ip-hint">This becomes the goal diamond at the end of your path.</p>
+            </div>
+        </fieldset>
+
+        <fieldset class="ip-fieldset">
+            <legend>Password</legend>
+            <div class="ip-form-grid">
+                <div class="field">
+                    <label asp-for="Password"></label>
+                    <input asp-for="Password" autocomplete="new-password" />
+                    <span asp-validation-for="Password" class="field-validation-error"></span>
+                </div>
+                <div class="field">
+                    <label asp-for="ConfirmPassword"></label>
+                    <input asp-for="ConfirmPassword" autocomplete="new-password" />
+                    <span asp-validation-for="ConfirmPassword" class="field-validation-error"></span>
+                </div>
+            </div>
+            <p class="ip-hint" style="margin:-6px 0 12px">At least 8 characters, with a number, a capital and a small letter.</p>
+        </fieldset>
+
+        <fieldset class="ip-fieldset">
+            <legend>Your consent (POPIA)</legend>
+            <label class="ip-check">
+                <input asp-for="AcceptTermsAndPrivacy" />
+                <span>I accept the Terms and have read the <a href="/privacy" target="_blank">privacy notice</a>. <strong>Required.</strong></span>
+            </label>
+            <span asp-validation-for="AcceptTermsAndPrivacy" class="field-validation-error"></span>
+            <label class="ip-check">
+                <input asp-for="AllowAutofillSharing" />
+                <span>Pre-fill provider sign-up forms with my name, email, mobile and province. I'll see exactly what's shared each time. <em>You can switch this off later.</em></span>
+            </label>
+            <label class="ip-check">
+                <input asp-for="AllowMarketingEmail" />
+                <span>Send me course recommendations and a weekly digest. <em>Optional.</em></span>
+            </label>
+            <p class="ip-hint" style="margin-bottom:12px">If you're under 18, please check these choices with a parent or guardian.</p>
+        </fieldset>
+
+        <button type="submit" class="ip-btn ip-btn-gold ip-btn-big" style="width:100%">Create account</button>
+        <p class="ip-muted" style="margin-top:14px;text-align:center">Already registered? <a asp-action="Login" asp-route-returnUrl="@Model.ReturnUrl">Log in</a></p>
+    </form>
+</div>

@@ -1,0 +1,21 @@
+@model ErrorViewModel
+@{
+    ViewData["Title"] = "Something went wrong";
+}
+
+<div class="ip-page ip-page-narrow">
+    <div class="ip-head">
+        <div>
+            <p class="ip-greet">Eish</p>
+            <h1 class="ip-title">Something went wrong</h1>
+        </div>
+    </div>
+    <section class="ip-card ip-card-pad">
+        <p style="margin:0 0 16px">Sorry — we couldn't finish that request. Please try again in a moment.</p>
+        @if (Model.ShowRequestId)
+        {
+            <p class="ip-muted" style="margin-bottom:16px">Reference: <code>@Model.RequestId</code></p>
+        }
+        <a class="ip-btn ip-btn-gold" href="/">Back to Indlela</a>
+    </section>
+</div>

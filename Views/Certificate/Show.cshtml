@@ -1,0 +1,21 @@
+@model Indlela.Controllers.CertificateVm
+@{
+    ViewData["Title"] = $"Certificate · {Model.CourseTitle}";
+}
+
+<div class="ip-page">
+    <div class="ip-head no-print">
+        <div>
+            <p class="ip-greet">Well done</p>
+            <h1 class="ip-title">Your certificate of achievement</h1>
+        </div>
+        <div class="btn-row">
+            <button type="button" class="ip-btn ip-btn-gold ip-btn-big" onclick="window.print()">Download PDF / Print</button>
+            <button type="button" class="ip-btn ip-btn-line" data-copy="@Model.VerifyUrl">Copy share link</button>
+        </div>
+    </div>
+
+    <partial name="~/Views/Certificate/_Certificate.cshtml" model="Model" />
+
+    <p class="ip-muted no-print">Employers can check this certificate at the verification link printed on it. To save a PDF, choose <strong>Save as PDF</strong> in the print dialog.</p>
+</div>

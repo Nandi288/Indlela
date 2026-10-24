@@ -1,0 +1,102 @@
+@model AdminQueueVm
+@{
+    ViewData["Title"] = "Admin";
+}
+
+<div class="ip-page">
+    <div class="ip-head">
+        <div>
+            <p class="ip-greet">Admin</p>
+            <h1 class="ip-title">Course pipeline</h1>
+            <p class="ip-lede">Import free courses from a link, check what was found, and publish. Nothing goes live without a human approving it.</p>
+        </div>
+        <form method="post" asp-action="CheckLinks">
+            <button type="submit" class="ip-btn ip-btn-line">Check all links now</button>
+        </form>
+    </div>
+
+    @* ---------- Import from a link (UC-08 → UC-10, fast path) ---------- *@
+    <section class="ip-card ip-hero" aria-labelledby="import-title">
+        <div class="ip-hero-strand" aria-hidden="true"></div>
+        <div class="ip-hero-body">
+            <h2 id="import-title" class="ip-hero-title">Import a course from a link</h2>
+            <p class="ip-hero-text">Paste a free course page. We check the site's robots.txt, fetch the page and read the course details from its structured data and meta tags.</p>
+            <form class="ip-hero-search" method="post" asp-action="Import">
+                <label for="import-url" class="sr-only">Course page link</label>
+                <input id="import-url" type="url" name="url" required placeholder="https://… course page" autocomplete="off" />
+                <button type="submit" class="ip-btn ip-btn-gold ip-btn-big">Import</button>
+            </form>
+        </div>
+    </section>
+
+    <div class="ip-stats">
+        <div class="ip-card ip-stat">
+            <span class="ip-stat-label">Waiting for review</span>
+            <span class="ip-stat-num" style="color:@(Model.Pending.Count > 0 ? "var(--danger)" : "var(--primary)")">@Model.Pending.Count</span>
+            <p class="ip-muted">Imported, not visible to learners yet</p>
+        </div>
+        <div class="ip-card ip-stat">
+            <span class="ip-stat-label">Published courses</span>
+            <span class="ip-stat-num">@Model.PublishedCount</span>
+            <p class="ip-muted">Live in Explore</p>
+        </div>
+        <div class="ip-card ip-stat">
+            <span class="ip-stat-label">Broken links</span>
+            <span class="ip-stat-num" style="color:@(Model.Flagged.Count > 0 ? "var(--danger)" : "var(--primary)")">@Model.Flagged.Count</span>
+            <p class="ip-muted">Checked daily; flagged courses need a fix</p>
+        </div>
+    </div>
+
+    @* ---------- Review queue (UC-11) ---------- *@
+    <section class="ip-card ip-courses" aria-labelledby="queue-title">
+        <div class="ip-courses-head"><h2 id="queue-title" class="ip-h2">Review queue</h2></div>
+        @if (Model.Pending.Count == 0)
+        {
+            <p class="ip-muted" style="padding:10px 0">Nothing waiting. Import a course above to see it here.</p>
+        }
+        else
+        {
+            <ul class="ip-rows">
+                @foreach (var c in Model.Pending)
+                {
+                    <li class="ip-row">
+                        <div class="ip-row-title">
+                            <span class="ip-dot ask" aria-hidden="true"></span>
+                            <div style="min-width:0">
+                                <a asp-action="Review" asp-route-id="@c.Id">@c.Title</a>
+                                <p class="ip-muted">@c.Provider</p>
+                            </div>
+                        </div>
+                        <div><span class="ip-pill ip-pill-ask">Pending review</span></div>
+                        <p class="ip-muted">@c.Category · imported @c.CreatedAt.ToLocalTime().ToString("d MMM, HH:mm")</p>
+                        <div class="ip-actions"><a class="ip-btn ip-btn-gold" asp-action="Review" asp-route-id="@c.Id">Review</a></div>
+                    </li>
+                }
+            </ul>
+        }
+    </section>
+
+    @if (Model.Flagged.Count > 0)
+    {
+        <section class="ip-card ip-courses" aria-labelledby="flag-title">
+            <div class="ip-courses-head"><h2 id="flag-title" class="ip-h2">Broken links</h2></div>
+            <ul class="ip-rows">
+                @foreach (var c in Model.Flagged)
+                {
+                    <li class="ip-row">
+                        <div class="ip-row-title">
+                            <span class="ip-dot ask" aria-hidden="true"></span>
+                            <div style="min-width:0">
+                                <a asp-action="Review" asp-route-id="@c.Id">@c.Title</a>
+                                <p class="ip-muted">@c.Provider</p>
+                            </div>
+                        </div>
+                        <div><span class="ip-pill ip-pill-ask">Needs re-verification</span></div>
+                        <p class="ip-muted">Last worked @c.LastVerifiedAt.ToLocalTime().ToString("d MMM")</p>
+                        <div class="ip-actions"><a class="ip-btn ip-btn-line" href="@c.OriginalUrl" target="_blank" rel="noopener">Open link ↗</a></div>
+                    </li>
+                }
+            </ul>
+        </section>
+    }
+</div>

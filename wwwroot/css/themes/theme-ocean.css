@@ -1,0 +1,55 @@
+/* ==========================================================================
+   Option B — "Indian Ocean": deep sea blue and sunrise orange, inspired by Durban's coast.
+   Fonts: Sora (headings) + Inter (body). Background: images/themes/ocean.svg.
+   ========================================================================== */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Sora:wght@600;700;800&display=swap");
+
+:root {
+  --font-head: "Sora", system-ui, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-body: "Inter", system-ui, "Segoe UI", Roboto, Arial, sans-serif;
+
+  --bg: #F2F7F9;          --app-bg: #E6F0F4;
+  --surface: #FFFFFF;     --surface-2: #EAF2F5;
+  --border: #D7E4EA;      --border-strong: #BCD0D9;
+  --ink: #0F2230;         --muted: #4A6372;
+
+  --primary: #0B6E8E;     --primary-hover: #085670;   --primary-tint: #E1F1F7;  --on-primary: #FFFFFF;
+  --gold: #FF8C42;        --gold-hover: #F57527;      --gold-tint: #FFF0E4;     --on-gold: #2B1405;  --gold-ink: #8A3C0B;
+  --info: #3B5BDB;        --info-tint: #E9EDFC;       --info-ink: #2C46A8;
+  --danger: #C2261D;      --danger-tint: #FDECEA;     --danger-ink: #8E1B14;
+  --bead-blue: var(--info); --bead-red: #E8554E;
+  --focus-ring: rgba(11, 110, 142, .25);
+  --shadow-color: rgba(11, 110, 142, .14);
+
+  --app-side: #0B2F45;    --app-side-deep: #082335;   --app-side-text: #D7ECF5;  --app-side-muted: #A9C9D8;
+  --hero-bg: #0B3D57;     --hero-text-soft: #D4EEF7;
+  --strand: repeating-linear-gradient(90deg, #38BDF8 0 10px, transparent 10px 12px, #FF8C42 12px 22px, transparent 22px 24px,
+            #FFFFFF 24px 34px, transparent 34px 36px, #FFD166 36px 46px, transparent 46px 48px, #0EA5E9 48px 58px, transparent 58px 60px);
+
+  --page-image: url("../../images/themes/ocean.svg");
+  --page-veil: rgba(242, 247, 249, .87);
+  --main-bg: rgba(255, 255, 255, .87);
+  --hero-image: url("../../images/themes/ocean.svg");
+  --hero-veil-1: rgba(6, 30, 46, .88);  --hero-veil-2: rgba(6, 30, 46, .2);
+}
+
+html[data-theme="dark"] {
+  --bg: #07141D;          --app-bg: #050F16;
+  --surface: #0F2230;     --surface-2: #142C3D;
+  --border: #1E3A4C;      --border-strong: #2C5167;
+  --ink: #E3EEF3;         --muted: #93AEBC;
+
+  --primary: #4CC9F0;     --primary-hover: #8BDDF6;   --primary-tint: #0E3346;  --on-primary: #04202C;
+  --gold: #FF9F5A;        --gold-hover: #FFB781;      --gold-tint: #3A2516;     --on-gold: #2B1405;  --gold-ink: #FFC79E;
+  --info: #8EA6FF;        --info-tint: #1A2546;       --info-ink: #C2CEFF;
+  --danger: #FF8A80;      --danger-tint: #3B1A1A;     --danger-ink: #FFB4AD;
+  --focus-ring: rgba(76, 201, 240, .3);
+  --shadow-color: rgba(0, 0, 0, .45);
+
+  --app-side: #061B28;    --app-side-deep: #04131D;   --app-side-text: #CFE6F0;  --app-side-muted: #8FB3C4;
+  --hero-bg: #08283A;     --hero-text-soft: #CBE7F2;
+
+  --page-veil: rgba(5, 15, 22, .84);
+  --main-bg: rgba(7, 20, 29, .86);
+  --hero-veil-1: rgba(3, 14, 22, .9);   --hero-veil-2: rgba(3, 14, 22, .3);
+}

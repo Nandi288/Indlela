@@ -1,0 +1,70 @@
+@model HandoffConfirmVm
+@{
+    ViewData["Title"] = $"Enrol: {Model.Course.Title}";
+}
+
+<div class="ip-page ip-page-narrow">
+    <p class="ip-crumb"><a asp-action="Details" asp-route-id="@Model.Course.Id" asp-route-slug="@Model.Course.Slug">← Back to course</a></p>
+
+    <div class="ip-head">
+        <div>
+            <p class="ip-greet">Enrol in one click</p>
+            <h1 class="ip-title">Before we open @Model.Course.Provider</h1>
+            <p class="ip-lede">You're enrolling in <strong>@Model.Course.Title</strong>. Here's exactly what happens next.</p>
+        </div>
+    </div>
+
+    <section class="ip-card ip-hero" aria-label="What happens next">
+        <div class="ip-hero-strand" aria-hidden="true"></div>
+        <div class="ip-hero-body">
+            <ol class="ip-steps" style="color:#fff">
+                <li><span>You confirm the details below.</span></li>
+                <li><span>We open @Model.Course.Provider's sign-up with them already filled in.</span></li>
+                <li><span>You check the form and press <strong>Submit</strong> yourself — we never do it for you.</span></li>
+            </ol>
+        </div>
+    </section>
+
+    <section class="ip-card ip-card-pad" aria-labelledby="share-title">
+        @if (Model.FieldsToShare.Count > 0)
+        {
+            <h2 id="share-title" class="ip-h2">We'll pre-fill these details</h2>
+            <table class="ip-share">
+                <tbody>
+                    @foreach (var field in Model.FieldsToShare)
+                    {
+                        <tr><th scope="row">@field.Label</th><td>@field.DisplayValue</td></tr>
+                    }
+                </tbody>
+            </table>
+            <p class="ip-muted" style="margin-top:12px">
+                @(Model.Strategy == HandoffStrategy.Extension
+                    ? "The Indlela browser extension fills these into the provider's form in your own browser."
+                    : "These go into the provider's sign-up link so their form opens filled in.")
+                Nothing else is shared. You'll still choose your own password on their site.
+            </p>
+        }
+        else
+        {
+            <h2 id="share-title" class="ip-h2">You'll copy your details in one tap</h2>
+            <p class="ip-muted">
+                @(Model.HasAutofillConsent
+                    ? $"{Model.Course.Provider} doesn't support pre-filled sign-up yet."
+                    : "You've switched off sharing details with providers, so nothing will be sent.")
+                We'll open their sign-up page and give you copy buttons for each detail.
+            </p>
+        }
+
+        @if (Model.ProviderRequiresId)
+        {
+            <div class="ip-note" style="margin-top:14px"><p>This provider asks for an ID or passport number. For your safety we never put it in a link — you'll type it on their site.</p></div>
+        }
+
+        <form method="post" asp-action="Handoff" asp-route-id="@Model.Course.Id" style="margin-top:20px">
+            <div class="btn-row">
+                <button type="submit" class="ip-btn ip-btn-gold ip-btn-big">Continue to @Model.Course.Provider</button>
+                <a class="ip-btn ip-btn-quiet" asp-action="Details" asp-route-id="@Model.Course.Id" asp-route-slug="@Model.Course.Slug">Cancel</a>
+            </div>
+        </form>
+    </section>
+</div>

@@ -1,0 +1,20 @@
+@model ForecastVm
+@* The Forecast: predicted finish date and a nudge, worked out from the learner's own study pattern. *@
+@{
+    var ringColour = Model.Status switch { "at-risk" => "#FF8E7E", "slipping" => "#F0B43C", _ => "#E8B04B" };
+}
+<section class="ix-glass fc @Model.Status" aria-labelledby="fc-title">
+    <div class="fc-ring" style="background:conic-gradient(@ringColour @(Model.Percent * 3.6)deg, rgba(255,255,255,.12) 0)">
+        <span style="display:grid;place-items:center;width:58px;height:58px;border-radius:50%;background:#0E3A2C">@Model.Percent%</span>
+    </div>
+    <div>
+        <p class="ix-kicker" style="margin-bottom:2px">Forecast · @Model.PathName</p>
+        <h2 id="fc-title">@Model.Headline</h2>
+        <p>@Model.Nudge</p>
+        @if (Model.RemainingHours > 0)
+        {
+            <p style="font-size:.88rem;margin-top:6px">About @Model.RemainingHours hours to go · your pace: @Model.EffectiveHoursPerWeek hours a week</p>
+        }
+    </div>
+    <a class="ix-btn-gold ix-btn-sm" href="/paths/@Model.PathSlug">@(Model.Status == "done" ? "See my portfolio" : "Next step")</a>
+</section>

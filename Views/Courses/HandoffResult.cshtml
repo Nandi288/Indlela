@@ -1,0 +1,89 @@
+@model HandoffResultVm
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment Env
+@{
+    ViewData["Title"] = $"Continue to {Model.Course.Provider}";
+    var isDeepLink = Model.Strategy == HandoffStrategy.DeepLink;
+}
+
+<div class="ip-page">
+    <div class="ip-head">
+        <div>
+            <p class="ip-greet">Almost there</p>
+            <h1 class="ip-title">Your sign-up is ready</h1>
+            <p class="ip-lede">Open <strong>@Model.Course.Provider</strong>, check the form and press their <strong>Submit</strong> button. Then come back and tell us how it went.</p>
+        </div>
+    </div>
+
+    <div class="ip-with-side">
+        <div class="ip-stack">
+            <section class="ip-card ip-hero" aria-labelledby="open-title">
+                <div class="ip-hero-strand" aria-hidden="true"></div>
+                <div class="ip-hero-body">
+                    <p class="ip-hero-text" style="margin:0 0 6px;font-weight:800;letter-spacing:.06em;color:#F2C54A">STEP 1</p>
+                    <h2 id="open-title" class="ip-hero-title">Open the provider</h2>
+                    <p class="ip-hero-text">@(isDeepLink ? "Your first name, surname and email should already be filled in." : "Use the copy buttons below to fill in their form.")</p>
+                    @* rel=noreferrer: the deep link's query string must not leak further via the Referer header *@
+                    <a class="ip-btn ip-btn-gold ip-btn-big" style="margin-top:16px" href="@Model.TargetUrl" target="_blank" rel="noopener noreferrer">Open @Model.Course.Provider sign-up ↗</a>
+                </div>
+            </section>
+
+            <section class="ip-card ip-card-pad" aria-label="Your details">
+                @if (isDeepLink)
+                {
+                    <details class="ip-problem">
+                        <summary>Fields not filled? Copy them here</summary>
+                        <partial name="_CopyPanel" model="Model.CopyFields" />
+                    </details>
+                }
+                else
+                {
+                    <h2 class="ip-h2">Copy your details</h2>
+                    <p class="ip-muted">Tap a button, then paste into the matching field on the provider's form.</p>
+                    <partial name="_CopyPanel" model="Model.CopyFields" />
+                }
+            </section>
+
+            @if (Model.ExtensionPayloadJson is not null && Env.IsDevelopment())
+            {
+                <section class="ip-card ip-card-pad" aria-label="Extension payload (simulation)">
+                    <h2 class="ip-h2">Extension payload (simulation)</h2>
+                    <p class="ip-muted">What the browser extension would receive from <code>/api/extension/handoff/{token}</code>. Shown in Development only.</p>
+                    <pre class="payload">@Model.ExtensionPayloadJson</pre>
+                </section>
+            }
+        </div>
+
+        <aside class="ip-stack">
+            <section class="ip-card ip-card-pad" aria-labelledby="done-title">
+                <p class="ip-muted" style="font-weight:800;letter-spacing:.06em">STEP 2</p>
+                <h2 id="done-title" class="ip-h2">Did you finish registering?</h2>
+                <form method="post" asp-action="ConfirmEnrollment" class="ip-actions-col" style="margin-top:6px">
+                    <input type="hidden" name="enrollmentId" value="@Model.EnrollmentId" />
+                    <button type="submit" name="enrolled" value="true" class="ip-btn ip-btn-green ip-btn-big">Yes, I'm registered</button>
+                    <button type="submit" name="enrolled" value="false" class="ip-btn ip-btn-line">Not yet</button>
+                </form>
+
+                <details class="ip-problem" style="margin-top:10px">
+                    <summary>I had a problem</summary>
+                    <form method="post" asp-action="ConfirmEnrollment">
+                        <input type="hidden" name="enrollmentId" value="@Model.EnrollmentId" />
+                        <input type="hidden" name="enrolled" value="false" />
+                        <fieldset class="ip-fieldset">
+                            <legend>What went wrong?</legend>
+                            <label class="ip-check"><input type="radio" name="reason" value="FormTooLong" required /> <span>The form was too long</span></label>
+                            <label class="ip-check"><input type="radio" name="reason" value="FieldsNotFilled" /> <span>My details weren't filled in</span></label>
+                            <label class="ip-check"><input type="radio" name="reason" value="SiteError" /> <span>The site showed an error</span></label>
+                            <label class="ip-check"><input type="radio" name="reason" value="DataRanOut" /> <span>My data ran out</span></label>
+                            <label class="ip-check"><input type="radio" name="reason" value="Other" /> <span>Something else</span></label>
+                            <div class="field">
+                                <label for="details">Anything else? (optional)</label>
+                                <textarea id="details" name="details" rows="2" maxlength="500" style="width:100%"></textarea>
+                            </div>
+                        </fieldset>
+                        <button type="submit" class="ip-btn ip-btn-line" style="width:100%">Send</button>
+                    </form>
+                </details>
+            </section>
+        </aside>
+    </div>
+</div>

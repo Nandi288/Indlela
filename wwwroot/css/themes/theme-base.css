@@ -1,0 +1,162 @@
+/* ==========================================================================
+   Indlela — theme layer (shared by every colour theme)
+   Load order in _AppLayout: site.css → app.css → themes/theme-base.css → ONE palette file.
+   This file turns the colours that app.css hard-codes into tokens, adds light/dark
+   mode (html[data-theme="dark"]) and the background pictures. Palette files only set tokens.
+   ========================================================================== */
+
+:root { color-scheme: light; }
+html[data-theme="dark"] { color-scheme: dark; }
+
+/* ---------- Page background picture ---------- */
+.app-body {
+  background:
+    linear-gradient(var(--page-veil), var(--page-veil)),
+    var(--page-image) center / cover no-repeat fixed,
+    var(--app-bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  transition: background-color .3s ease, color .3s ease;
+}
+.app-body h1, .app-body h2, .app-body h3, .app-body .app-brand-name, .ip-title, .ip-hero-title { font-family: var(--font-head); }
+.app-nav a, .app-side-foot a, .app-side-foot button { font-family: var(--font-body); }
+
+/* Main column is frosted, so the picture shows softly around the content. */
+.app-main {
+  background: var(--main-bg);
+  -webkit-backdrop-filter: blur(10px) saturate(130%);
+  backdrop-filter: blur(10px) saturate(130%);
+  color: var(--ink);
+}
+.app-top { border-color: var(--border); }
+
+/* ---------- Sidebar ---------- */
+.app-side { background: var(--app-side); }
+.app-strand, .ip-hero-strand { background: var(--strand), var(--app-side-deep); }
+.app-brand-mark rect { fill: #FFFFFF; }
+.app-brand-mark path { stroke: var(--hero-bg); }
+.app-brand-mark circle { fill: var(--gold); }
+.app-nav a[aria-current="page"] { background: var(--surface); color: var(--primary); }
+.app-avatar { background: var(--primary); color: var(--on-primary); }
+
+/* ---------- Surfaces, text, inputs ---------- */
+.ip-card, .ip-fieldset, .ip-mock, .ip-cert, .ip-option, .ip-chip, .app-search { background: var(--surface); border-color: var(--border); color: var(--ink); }
+.ip-muted, .ip-lede, .ip-news p, .app-foot { color: var(--muted); }
+.app-search { border-color: var(--border-strong); }
+.app-search input, .app-search svg { color: var(--ink); }
+.app-body input[type=text], .app-body input[type=email], .app-body input[type=password], .app-body input[type=tel],
+.app-body input[type=number], .app-body input[type=url], .app-body select, .app-body textarea,
+.app-body input[type=search]:not(.app-search input):not(.ip-hero-search input) { background: var(--surface); color: var(--ink); border-color: var(--border-strong); }
+.app-search input { background: transparent; color: var(--ink); }
+.app-body input::placeholder, .app-body textarea::placeholder { color: var(--muted); opacity: .85; }
+.app-body input:focus, .app-body select:focus, .app-body textarea:focus { border-color: var(--primary); outline-color: var(--focus-ring); }
+/* Plain text links only: buttons, chips and the sidebar keep their own colours. */
+.app-content a:not([class]), .app-foot a:not([class]) { color: var(--primary); }
+.app-content a:not([class]):hover, .app-foot a:not([class]):hover { color: var(--primary-hover); }
+.ip-hero a:not([class]) { color: #fff; }
+.ip-course h3 a { color: var(--ink); }
+.ip-course h3 a:hover { color: var(--primary); }
+
+/* ---------- Buttons ---------- */
+.ip-btn-gold { background: var(--gold); color: var(--on-gold); }
+.ip-btn-gold:hover { background: var(--gold-hover); color: var(--on-gold); }
+.ip-btn-green { background: var(--primary); color: var(--on-primary); }
+.ip-btn-green:hover { background: var(--primary-hover); color: var(--on-primary); }
+.ip-btn-line { background: var(--surface); border-color: var(--primary); color: var(--primary); }
+.ip-btn-line:hover { background: var(--primary-tint); color: var(--primary-hover); }
+.ip-btn-quiet { color: var(--primary); }
+.ip-btn-quiet:hover { background: var(--primary-tint); }
+.ip-btn-alert { background: var(--gold-tint); color: var(--gold-ink); border-color: var(--gold); }
+.ip-btn-alert:hover { background: var(--gold-tint); color: var(--gold-ink); filter: brightness(.97); }
+
+/* ---------- Pills, notes, flashes ---------- */
+.ip-pill-here { background: var(--primary-tint); color: var(--primary); }
+.ip-pill-provider { background: var(--info-tint); color: var(--info-ink); }
+.ip-pill-ask { background: var(--danger-tint); color: var(--danger-ink); }
+.ip-pill-done, .ip-pill-gold { background: var(--gold-tint); color: var(--gold-ink); }
+.ip-pill-self, .ip-cert-seal.self { background: var(--surface-2); color: var(--muted); }
+.ip-pill-line { background: var(--surface); color: var(--primary); box-shadow: inset 0 0 0 2px var(--primary); }
+.ip-note { background: var(--gold-tint); border-color: var(--gold); color: var(--gold-ink); }
+.ip-note.info { background: var(--info-tint); border-color: var(--info); color: var(--info-ink); }
+.app-flash { background: var(--primary-tint); color: var(--primary); border-color: var(--primary); }
+.app-flash.error { background: var(--danger-tint); color: var(--danger-ink); border-color: var(--danger); }
+.ip-skill { background: var(--gold-tint); border-color: var(--gold); color: var(--ink); }
+.ip-skill:hover { background: var(--gold); color: var(--on-gold); }
+
+/* ---------- Accent shapes ---------- */
+.ip-diamond { background: var(--gold); }
+.ip-diamond.tone-1 { background: var(--primary); }
+.ip-diamond.tone-2 { background: var(--info); }
+.ip-chip::before, .ip-dot, .ip-bar > div > span, .ip-beads i { background: var(--primary); }
+.ip-dot.provider, .ip-chips li:nth-child(5n+3) .ip-chip::before { background: var(--info); }
+.ip-beadbar > span { background: repeating-linear-gradient(90deg, var(--primary) 0 10px, var(--primary-hover) 10px 12px); }
+.ip-beadbar, .ip-bar > div { background: var(--surface-2); }
+.ip-chip[aria-current="true"] { background: var(--primary); border-color: var(--primary); color: var(--on-primary); }
+.ip-course:hover, .ip-course:focus-within { border-color: var(--primary); box-shadow: 0 12px 26px var(--shadow-color); }
+.ip-option:has(input:checked) { border-color: var(--primary); background: var(--primary-tint); }
+.ip-mock-field span:last-child { background: var(--primary-tint); border-color: var(--border); color: var(--ink); }
+
+/* ---------- Hero: the background picture lives here too ---------- */
+.ip-hero {
+  background:
+    linear-gradient(var(--hero-veil-angle, 100deg), var(--hero-veil-1), var(--hero-veil-2)),
+    var(--hero-image) center / cover no-repeat,
+    var(--hero-bg);
+  color: #fff;
+}
+.ip-hero-text, .ip-hero-sub, .ip-hero-num span { color: var(--hero-text-soft); }
+.ip-hero .ip-chip { background: rgba(255, 255, 255, .12); border-color: rgba(255, 255, 255, .3); color: #fff; }
+.ip-hero .ip-chip:hover { background: rgba(255, 255, 255, .22); color: #fff; }
+.ip-hero .ip-chip[aria-current="true"] { background: var(--gold); border-color: var(--gold); color: var(--on-gold); }
+.ip-hero-search input { background: #fff; color: #14151A; }
+.ip-hero .ip-mock { background: var(--surface); color: var(--ink); }
+
+/* SVG paths drawn in Razor with fixed colours: recolour them per theme. */
+.ip-path [stroke="#F2A900"] { stroke: var(--gold); }
+.ip-path [fill="#F2A900"] { fill: var(--gold); }
+.ip-path [fill="#0B5D3B"] { fill: var(--hero-bg); }
+.ip-cert-brand rect, .ip-cert-brand [fill="#0B5D3B"] { fill: var(--primary); }
+.ip-cert-brand [fill="#F2A900"] { fill: var(--gold); }
+.ip-lesson-beads li.current a, .ip-lesson-beads li.current a span { background: var(--surface); color: var(--primary) !important; }
+
+/* ---------- Certificate stays paper-white in both modes (it's printed) ---------- */
+.ip-cert { background: #fff; color: #14151A; }
+.ip-cert .ip-muted, .ip-cert p { color: #4A4F57; }
+
+/* ---------- Theme toggle button (in the top bar) ---------- */
+.theme-toggle {
+  display: inline-grid; place-items: center; width: 46px; height: 46px; flex-shrink: 0;
+  border-radius: 50%; border: 2px solid var(--border-strong); background: var(--surface); color: var(--ink); cursor: pointer;
+}
+.theme-toggle:hover { border-color: var(--primary); color: var(--primary); }
+.theme-toggle svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.theme-toggle .i-sun { display: none; }
+html[data-theme="dark"] .theme-toggle .i-sun { display: block; }
+html[data-theme="dark"] .theme-toggle .i-moon { display: none; }
+
+@media (prefers-reduced-motion: reduce) { .app-body { transition: none; } }
+
+/* Printing: no pictures, plain white. */
+@media print {
+  .app-body { background: #fff !important; }
+  .app-main { background: #fff !important; -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .theme-toggle { display: none; }
+}
+
+/* ---------- Roadmaps (/paths): numbered steps on a line, coloured by status ---------- */
+.ip-roadmap { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.ip-roadmap-stage { margin: 8px 0 -4px 50px; font-size: .78rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.ip-roadmap-step { position: relative; display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 14px; align-items: start; }
+.ip-roadmap-step::before { content: ""; position: absolute; left: 17px; top: 40px; bottom: -18px; width: 2px; background: var(--border-strong); }
+.ip-roadmap-step:last-child::before { display: none; }
+.ip-roadmap-num { position: relative; z-index: 1; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; font-weight: 900; background: var(--surface); color: var(--muted); border: 2px solid var(--border-strong); }
+.ip-roadmap-step.is-next .ip-roadmap-num, .ip-roadmap-step.is-inprogress .ip-roadmap-num { background: var(--primary); border-color: var(--primary); color: var(--on-primary); }
+.ip-roadmap-step.is-done .ip-roadmap-num { background: var(--gold); border-color: var(--gold); color: var(--on-gold); }
+.ip-roadmap-step.is-done::before { background: var(--gold); }
+.ip-roadmap-step.is-next > .ip-card, .ip-roadmap-step.is-inprogress > .ip-card { border-color: var(--primary); }
+.ip-roadmap-step:target > .ip-card { box-shadow: 0 0 0 3px var(--focus-ring); }
+.ip-roadmap-done { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+.ip-roadmap-done label { display: block; font-weight: 700; font-size: .9rem; margin-bottom: 6px; }
+.ip-roadmap-done-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.ip-roadmap-done-row input { flex: 1 1 220px; min-width: 0; min-height: 44px; padding: 0 12px; border: 2px solid var(--border-strong); border-radius: 10px; }
+@media (max-width: 560px) { .ip-roadmap-stage { margin-left: 0; } .ip-roadmap-step { grid-template-columns: 28px minmax(0, 1fr); gap: 10px; } .ip-roadmap-num { width: 28px; height: 28px; font-size: .85rem; } .ip-roadmap-step::before { left: 13px; top: 32px; } }

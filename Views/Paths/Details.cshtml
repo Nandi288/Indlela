@@ -1,0 +1,201 @@
+@model PathDetailsVm
+@{
+    ViewData["Title"] = Model.Name;
+    var returnUrl = Uri.EscapeDataString(Context.Request.Path.Value ?? "/paths");
+    string? lastStage = null;
+
+    string StatusLabel(RoadmapStepVm s) => s.Status switch
+    {
+        StepStatus.Done => "Done",
+        StepStatus.InProgress => $"In progress · {s.Percent}%",
+        StepStatus.Next => "Up next",
+        _ => "To do"
+    };
+    string StatusPill(RoadmapStepVm s) => s.Status switch
+    {
+        StepStatus.Done => "ip-pill-done",
+        StepStatus.InProgress or StepStatus.Next => "ip-pill-here",
+        _ => "ip-pill-self"
+    };
+    string TypeLabel(RoadmapStepType t) => t switch
+    {
+        RoadmapStepType.IndlelaLesson => "Learn here",
+        RoadmapStepType.ExternalCourse => "On provider ↗",
+        _ => "Project"
+    };
+}
+
+<div class="ip-page">
+    <p class="ip-crumb"><a href="/paths">← All roadmaps</a></p>
+
+    @* ---------- Hero: the roadmap and overall progress ---------- *@
+    <section class="ip-card ip-hero" aria-labelledby="path-title">
+        <div class="ip-hero-strand" aria-hidden="true"></div>
+        <div class="ip-hero-body">
+            <p class="ip-hero-text" style="margin:0 0 8px;font-weight:800;letter-spacing:.06em;text-transform:uppercase">@Model.Stream roadmap</p>
+            <h1 id="path-title" class="ip-hero-title">@Model.Name</h1>
+            <p class="ip-hero-text">@Model.Summary</p>
+            <div class="ip-course-pills" style="margin-top:12px">
+                <span class="ip-pill">@Model.Steps.Count steps</span>
+                <span class="ip-pill">About @Model.TotalHours hours</span>
+                <span class="ip-pill ip-pill-gold">Free to start</span>
+                @if (Model.IsActive)
+                {
+                    <span class="ip-pill ip-pill-here">Your roadmap</span>
+                }
+            </div>
+
+            @if (Model.IsSignedIn)
+            {
+                <div class="ip-bar @(Model.Percent == 100 ? "done" : null)" style="margin:16px 0;max-width:420px">
+                    <div role="progressbar" aria-valuenow="@Model.Percent" aria-valuemin="0" aria-valuemax="100" aria-label="Roadmap progress"><span style="width:@Model.Percent%"></span></div>
+                    <b>@Model.DoneCount/@Model.Steps.Count</b>
+                </div>
+            }
+
+            <div class="ip-actions" style="justify-content:flex-start;margin-top:12px">
+                @if (!Model.IsSignedIn)
+                {
+                    <a class="ip-btn ip-btn-gold ip-btn-big" href="/account/register">Create free account to follow</a>
+                    <a class="ip-btn ip-btn-quiet" style="color:#fff" href="/account/login?returnUrl=@returnUrl">Log in</a>
+                }
+                else if (!Model.IsActive)
+                {
+                    <form method="post" asp-action="Start" asp-route-slug="@Model.Slug">
+                        <button type="submit" class="ip-btn ip-btn-gold ip-btn-big">@(Model.OtherActiveName is null ? "Follow this roadmap" : "Switch to this roadmap")</button>
+                    </form>
+                }
+                else if (Model.NextStep is { } next)
+                {
+                    <a class="ip-btn ip-btn-gold ip-btn-big" href="#step-@next.Id">Go to step @next.Order</a>
+                }
+            </div>
+            @if (Model.IsSignedIn && !Model.IsActive && Model.OtherActiveName is not null)
+            {
+                <p class="ip-hero-text" style="font-size:.9rem;margin-top:10px">You're following <strong>@Model.OtherActiveName</strong>. Switching keeps everything you've done there.</p>
+            }
+        </div>
+    </section>
+
+    @if (Model.CompletedAt is not null)
+    {
+        <div class="ip-note" role="status" style="margin-top:18px"><p><strong>Roadmap complete.</strong> Every step is done — your project and certificate links are ready for your portfolio.</p></div>
+    }
+
+    <div class="ip-with-side">
+        @* ---------- The steps, grouped by stage ---------- *@
+        <ol class="ip-roadmap" aria-label="Steps">
+            @foreach (var s in Model.Steps)
+            {
+                if (s.Stage != lastStage)
+                {
+                    lastStage = s.Stage;
+                    <li class="ip-roadmap-stage" aria-hidden="true">@s.Stage</li>
+                }
+                <li id="step-@s.Id" class="ip-roadmap-step is-@s.Status.ToString().ToLowerInvariant()">
+                    <span class="ip-roadmap-num" aria-hidden="true">@(s.IsDone ? "✓" : s.Order.ToString())</span>
+                    <article class="ip-card ip-card-pad" aria-labelledby="step-title-@s.Id">
+                        <div class="ip-course-pills">
+                            <span class="ip-pill @StatusPill(s)">@StatusLabel(s)</span>
+                            <span class="ip-pill @(s.Type == RoadmapStepType.ExternalCourse ? "ip-pill-provider" : "ip-pill-line")">@TypeLabel(s.Type)</span>
+                        </div>
+                        <h2 id="step-title-@s.Id" class="ip-h2" style="margin:10px 0 6px">
+                            <span class="sr-only">Step @s.Order: </span>@s.Title
+                        </h2>
+                        <p style="margin:0 0 10px">@s.WhatYouLearn</p>
+                        <p class="ip-muted" style="margin:0 0 12px;font-size:.9rem">
+                            @s.ProviderName · @s.CostNote@(s.EstimatedHours is int h ? $" · about {h} hour{(h == 1 ? "" : "s")}" : "") · Proof: @s.ProofType
+                        </p>
+                        @if (s.Skills.Count > 0)
+                        {
+                            <ul class="ip-chips" aria-label="Skills">
+                                @foreach (var skill in s.Skills)
+                                {
+                                    <li><span class="ip-chip">@skill</span></li>
+                                }
+                            </ul>
+                        }
+
+                        @if (s.Type == RoadmapStepType.IndlelaLesson && s.IsEnrolled && !s.IsDone)
+                        {
+                            <div class="ip-bar" style="margin-top:14px">
+                                <div role="progressbar" aria-valuenow="@s.Percent" aria-valuemin="0" aria-valuemax="100" aria-label="Lesson progress"><span style="width:@s.Percent%"></span></div>
+                                <b>@s.Percent%</b>
+                            </div>
+                        }
+
+                        @if (s.IsDone && !string.IsNullOrEmpty(s.EvidenceUrl))
+                        {
+                            <p style="margin:12px 0 0;font-size:.9rem">Your link: <a href="@s.EvidenceUrl" target="_blank" rel="noopener nofollow">@s.EvidenceUrl</a></p>
+                        }
+
+                        @* ---------- Actions ---------- *@
+                        <div class="ip-actions" style="justify-content:flex-start;margin-top:14px">
+                            @if (s.Type == RoadmapStepType.IndlelaLesson && s.CourseId is int cid)
+                            {
+                                if (!Model.IsSignedIn)
+                                {
+                                    <a class="ip-btn ip-btn-line" href="/courses/@cid">See the lesson</a>
+                                }
+                                else if (s.IsEnrolled)
+                                {
+                                    <a class="ip-btn @(s.IsDone ? "ip-btn-line" : "ip-btn-green")" href="/learn/@cid">@(s.IsDone ? "Review lessons" : "Continue lesson")</a>
+                                }
+                                else
+                                {
+                                    <form method="post" action="/courses/@cid/start">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="ip-btn ip-btn-green">Start lesson</button>
+                                    </form>
+                                }
+                            }
+                            else
+                            {
+                                if (!string.IsNullOrEmpty(s.ExternalUrl))
+                                {
+                                    <a class="ip-btn ip-btn-line" href="@s.ExternalUrl" target="_blank" rel="noopener">Open on @s.ProviderName <span aria-hidden="true">↗</span></a>
+                                }
+                                if (Model.IsSignedIn && s.IsDone)
+                                {
+                                    <form method="post" asp-action="Undo" asp-route-id="@s.Id">
+                                        <button type="submit" class="ip-btn ip-btn-quiet">Not done yet</button>
+                                    </form>
+                                }
+                            }
+                        </div>
+
+                        @if (Model.IsSignedIn && !s.IsDone && s.Type != RoadmapStepType.IndlelaLesson)
+                        {
+                            <form method="post" asp-action="Done" asp-route-id="@s.Id" class="ip-roadmap-done">
+                                <label for="ev-@s.Id">@(s.Type == RoadmapStepType.Capstone ? "Project link (GitHub, Google Drive, Canva…)" : "Certificate or profile link") <span class="ip-muted">(optional)</span></label>
+                                <div class="ip-roadmap-done-row">
+                                    <input id="ev-@s.Id" name="evidenceUrl" type="url" inputmode="url" maxlength="500" placeholder="https://" />
+                                    <button type="submit" class="ip-btn ip-btn-gold">Mark as done</button>
+                                </div>
+                            </form>
+                        }
+                    </article>
+                </li>
+            }
+        </ol>
+
+        @* ---------- Side: where it leads, how proof works ---------- *@
+        <aside class="ip-stack" aria-label="About this roadmap">
+            <section class="ip-card ip-card-pad" aria-labelledby="careers-title">
+                <h2 id="careers-title" class="ip-h2">Where this leads</h2>
+                <ul class="ip-chips">
+                    @foreach (var c in Model.Careers)
+                    {
+                        <li><span class="ip-chip">@c</span></li>
+                    }
+                </ul>
+            </section>
+            <section class="ip-card ip-card-pad" aria-labelledby="proof-title">
+                <h2 id="proof-title" class="ip-h2">How proof works</h2>
+                <p style="margin:0 0 8px"><strong>Learn here</strong> steps tick themselves off when you pass the quiz.</p>
+                <p style="margin:0 0 8px"><strong>Provider</strong> courses open on their own site. Come back and mark them done, with your certificate link if you have one.</p>
+                <p class="ip-muted" style="margin:0">Links you add here will feed your Proof-of-Skills portfolio.</p>
+            </section>
+        </aside>
+    </div>
+</div>

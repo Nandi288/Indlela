@@ -1,0 +1,76 @@
+@model PathIndexVm
+@{
+    ViewData["Title"] = "Roadmaps";
+    var active = Model.Active;
+}
+
+<div class="ip-page">
+    <div class="ip-head">
+        <div>
+            <p class="ip-greet">Roadmaps</p>
+            <h1 class="ip-title">Pick a path. We'll show you every step.</h1>
+            <p class="ip-lede">Each roadmap mixes free Indlela lessons with free courses from trusted providers, and ends with a project you can show an employer.</p>
+        </div>
+    </div>
+
+    @if (active is not null)
+    {
+        <section class="ip-card ip-hero" aria-labelledby="active-title">
+            <div class="ip-hero-strand" aria-hidden="true"></div>
+            <div class="ip-hero-body">
+                <p class="ip-hero-text" style="margin:0 0 8px;font-weight:800;letter-spacing:.06em;text-transform:uppercase">Your roadmap</p>
+                <h2 id="active-title" class="ip-hero-title">@active.Name</h2>
+                <div class="ip-bar" style="margin:14px 0 18px;max-width:420px">
+                    <div role="progressbar" aria-valuenow="@active.Percent" aria-valuemin="0" aria-valuemax="100" aria-label="Roadmap progress"><span style="width:@active.Percent%"></span></div>
+                    <b>@active.DoneCount/@active.StepCount</b>
+                </div>
+                <a class="ip-btn ip-btn-gold ip-btn-big" asp-action="Details" asp-route-slug="@active.Slug">Continue my roadmap</a>
+            </div>
+        </section>
+    }
+
+    <ul class="ip-course-grid" style="margin-top:22px">
+        @foreach (var p in Model.Paths)
+        {
+            <li>
+                <article class="ip-card ip-course">
+                    <div class="ip-course-top">
+                        <span class="ip-dot" aria-hidden="true"></span>
+                        <span>@p.Stream</span>
+                    </div>
+                    <h3><a asp-action="Details" asp-route-slug="@p.Slug">@p.Name</a></h3>
+                    <p class="ip-muted">@p.Summary</p>
+                    <div class="ip-course-pills">
+                        <span class="ip-pill ip-pill-line">@p.StepCount steps</span>
+                        <span class="ip-pill ip-pill-gold">Free to start</span>
+                        @if (p.IsActive)
+                        {
+                            <span class="ip-pill ip-pill-here">Your roadmap</span>
+                        }
+                        else if (p.HasStarted)
+                        {
+                            <span class="ip-pill ip-pill-self">Started</span>
+                        }
+                    </div>
+                    @if (Model.IsSignedIn && p.DoneCount > 0)
+                    {
+                        <div class="ip-bar @(p.Percent == 100 ? "done" : null)">
+                            <div role="progressbar" aria-valuenow="@p.Percent" aria-valuemin="0" aria-valuemax="100" aria-label="@p.Name progress"><span style="width:@p.Percent%"></span></div>
+                            <b>@p.Percent%</b>
+                        </div>
+                    }
+                    <p class="ip-muted" style="margin:0;font-size:.85rem">Leads to: @string.Join(" · ", p.Careers)</p>
+                    <div class="ip-course-foot">
+                        <span>About @p.TotalHours hours</span>
+                        <b>See the steps →</b>
+                    </div>
+                </article>
+            </li>
+        }
+    </ul>
+
+    @if (Model.Paths.Count == 0)
+    {
+        <div class="ip-card ip-empty"><p class="ip-muted">No roadmaps yet. Restart the app to seed the starter roadmaps.</p></div>
+    }
+</div>

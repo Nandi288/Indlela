@@ -1,0 +1,55 @@
+/* ==========================================================================
+   Option A — "Jacaranda": violet and coral, inspired by Pretoria's jacaranda season.
+   Fonts: Plus Jakarta Sans. Background: images/themes/jacaranda.svg (swap for a photo if you like).
+   ========================================================================== */
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap");
+
+:root {
+  --font-head: "Plus Jakarta Sans", system-ui, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-body: "Plus Jakarta Sans", system-ui, "Segoe UI", Roboto, Arial, sans-serif;
+
+  --bg: #F6F3FC;          --app-bg: #EFE9FA;
+  --surface: #FFFFFF;     --surface-2: #F1ECFA;
+  --border: #E3DCF2;      --border-strong: #CFC4E6;
+  --ink: #1E1A2E;         --muted: #5E5872;
+
+  --primary: #6D3FD1;     --primary-hover: #5730A8;   --primary-tint: #EFE7FD;  --on-primary: #FFFFFF;
+  --gold: #FF8A65;        --gold-hover: #F2734C;      --gold-tint: #FFEDE6;     --on-gold: #2A1410;  --gold-ink: #8A3218;
+  --info: #2563EB;        --info-tint: #E8EFFD;       --info-ink: #1E40AF;
+  --danger: #C2261D;      --danger-tint: #FDECEA;     --danger-ink: #8E1B14;
+  --bead-blue: var(--info); --bead-red: #E0457B;
+  --focus-ring: rgba(109, 63, 209, .25);
+  --shadow-color: rgba(109, 63, 209, .14);
+
+  --app-side: #3B1F7A;    --app-side-deep: #2E1763;   --app-side-text: #E6DCFA;  --app-side-muted: #C4B3EC;
+  --hero-bg: #3B1F7A;     --hero-text-soft: #E9DEFF;
+  --strand: repeating-linear-gradient(90deg, #A78BFA 0 10px, transparent 10px 12px, #FF8A65 12px 22px, transparent 22px 24px,
+            #FFFFFF 24px 34px, transparent 34px 36px, #E0457B 36px 46px, transparent 46px 48px, #FDE68A 48px 58px, transparent 58px 60px);
+
+  --page-image: url("../../images/themes/jacaranda.svg");
+  --page-veil: rgba(246, 243, 252, .86);
+  --main-bg: rgba(255, 255, 255, .86);
+  --hero-image: url("../../images/themes/jacaranda.svg");
+  --hero-veil-1: rgba(42, 22, 89, .88);  --hero-veil-2: rgba(42, 22, 89, .25);
+}
+
+html[data-theme="dark"] {
+  --bg: #110D1C;          --app-bg: #0D0A16;
+  --surface: #1B1530;     --surface-2: #241C3D;
+  --border: #2E2648;      --border-strong: #463A6B;
+  --ink: #ECE8F7;         --muted: #A79FC2;
+
+  --primary: #B49CFF;     --primary-hover: #CDBDFF;   --primary-tint: #2C2250;  --on-primary: #1A1030;
+  --gold: #FF9B7A;        --gold-hover: #FFB49A;      --gold-tint: #3A2220;     --on-gold: #2A1410;  --gold-ink: #FFC2AD;
+  --info: #7AA2FF;        --info-tint: #1D2747;       --info-ink: #B9CCFF;
+  --danger: #FF8A80;      --danger-tint: #3B1A1A;     --danger-ink: #FFB4AD;
+  --focus-ring: rgba(180, 156, 255, .3);
+  --shadow-color: rgba(0, 0, 0, .45);
+
+  --app-side: #1A1233;    --app-side-deep: #130C28;   --app-side-text: #DCD2F7;  --app-side-muted: #A99BD6;
+  --hero-bg: #24164D;     --hero-text-soft: #DCD0FF;
+
+  --page-veil: rgba(13, 10, 22, .84);
+  --main-bg: rgba(17, 13, 28, .86);
+  --hero-veil-1: rgba(13, 8, 30, .9);    --hero-veil-2: rgba(13, 8, 30, .35);
+}

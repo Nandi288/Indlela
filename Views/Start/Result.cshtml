@@ -1,0 +1,62 @@
+@model SmartStartResultVm
+@{
+    ViewData["Title"] = "Your roadmap";
+    var b = Model.Best;
+}
+
+<div class="ix-page" style="max-width:980px;margin:0 auto">
+    <div>
+        <p class="ix-kicker">Your recommended roadmap</p>
+        <h1 class="ix-title">@b.Path.Name</h1>
+        <p class="ix-lede">@b.Path.Summary</p>
+    </div>
+
+    <div class="ix-glass">
+        <h2>Why this fits you</h2>
+        <ul class="ix-list">
+            @foreach (var r in b.Reasons)
+            {
+                <li><span class="ix-tag gold" style="margin-right:8px">✓</span>@r</li>
+            }
+        </ul>
+        <p class="ix-muted" style="margin:14px 0 0">@b.Path.StepCount steps · about @b.Path.TotalHours hours in total · leads to: @string.Join(", ", b.Path.Careers)</p>
+        <form method="post" asp-controller="Start" asp-action="Follow" asp-route-slug="@b.Path.Slug" style="margin-top:18px">
+            <button type="submit" class="ix-btn-gold" style="min-height:54px;padding:0 28px">Start this roadmap →</button>
+        </form>
+    </div>
+
+    @if (Model.Tips.Count > 0)
+    {
+        <div class="ix-glass">
+            <h2>Made for you</h2>
+            <ul class="ix-list">
+                @foreach (var t in Model.Tips)
+                {
+                    <li>@t</li>
+                }
+            </ul>
+        </div>
+    }
+
+    @if (Model.Others.Count > 0)
+    {
+        <div>
+            <h2 class="ix-title" style="font-size:1.5rem">Other roadmaps you could choose</h2>
+            <div class="ix-grid" style="margin-top:14px">
+                @foreach (var o in Model.Others)
+                {
+                    <div class="ix-glass" style="display:flex;flex-direction:column;gap:10px">
+                        <span class="ix-tag">@o.Path.Stream</span>
+                        <h3 style="margin:0;font-size:1.3rem;color:var(--ix-cream)">@o.Path.Name</h3>
+                        <p class="ix-muted" style="margin:0">@o.Path.Summary</p>
+                        <p class="ix-muted" style="margin:0;font-size:.9rem">About @o.Weeks weeks at @Model.HoursPerWeek hours a week</p>
+                        <form method="post" asp-controller="Start" asp-action="Follow" asp-route-slug="@o.Path.Slug">
+                            <button type="submit" class="ix-btn-line ix-btn-sm">Choose this instead</button>
+                        </form>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    <p class="ix-muted" style="margin:0"><a href="/start">Change my answers</a></p>
+</div>

@@ -1,0 +1,120 @@
+@model Indlela.Controllers.LessonVm
+@{
+    var c = Model.Course;
+    var l = Model.Lesson;
+    ViewData["Title"] = l is null ? c.Title : $"{l.Title} · {c.Title}";
+    var pct = Model.Enrollment.CurrentPercentage;
+    var complete = Model.Enrollment.IsCompleted;
+}
+
+<div class="ip-page">
+    <p class="ip-crumb"><a href="/dashboard">← My path</a></p>
+
+    <div class="ip-head">
+        <div>
+            <p class="ip-greet">Learn here</p>
+            <h1 class="ip-title">@c.Title</h1>
+        </div>
+        @if (complete)
+        {
+            <a class="ip-btn ip-btn-gold ip-btn-big" href="/certificate/@Model.Enrollment.Id">View certificate</a>
+        }
+    </div>
+
+    @* ---------- Progress along the lessons ---------- *@
+    <section class="ip-card ip-hero" aria-label="Course progress">
+        <div class="ip-hero-strand" aria-hidden="true"></div>
+        <div class="ip-hero-body">
+            <div class="ip-hero-top">
+                <div>
+                    <p class="ip-hero-text" style="margin:0">@Model.DoneCount of @Model.Lessons.Length lessons done · verified by in-app quizzes</p>
+                </div>
+                <div class="ip-hero-num"><b>@pct%</b></div>
+            </div>
+            <ol class="ip-lesson-beads" aria-label="Lessons">
+                @for (var i = 1; i <= Model.Lessons.Length; i++)
+                {
+                    var done = i <= Model.DoneCount;
+                    var current = i == Model.Number;
+                    var locked = i > Model.DoneCount + 1;
+                    <li class="@(done ? "done" : null) @(current ? "current" : null)">
+                        @if (locked)
+                        {
+                            <span aria-label="Lesson @i: @Model.Lessons[i - 1].Title (locked)"><i>@i</i><span>@Model.Lessons[i - 1].Title</span></span>
+                        }
+                        else
+                        {
+                            <a href="/learn/@c.Id/@i" aria-current="@(current ? "step" : null)"><i>@(done ? "✓" : i.ToString())</i><span>@Model.Lessons[i - 1].Title</span></a>
+                        }
+                    </li>
+                }
+            </ol>
+        </div>
+    </section>
+
+    @if (l is null)
+    {
+        @* ---------- Outline ---------- *@
+        <section class="ip-card ip-card-pad">
+            <h2 class="ip-h2">@(complete ? "You finished this course" : Model.DoneCount == 0 ? "Ready to start?" : "Welcome back")</h2>
+            <p style="margin:0 0 16px">@c.Description</p>
+            <div class="btn-row">
+                @if (complete)
+                {
+                    <a class="ip-btn ip-btn-gold ip-btn-big" href="/certificate/@Model.Enrollment.Id">View certificate</a>
+                    <a class="ip-btn ip-btn-line" href="/learn/@c.Id/1">Review lesson 1</a>
+                }
+                else
+                {
+                    <a class="ip-btn ip-btn-gold ip-btn-big" href="/learn/@c.Id/@Model.NextNumber">@(Model.DoneCount == 0 ? "Start lesson 1" : $"Continue with lesson {Model.NextNumber}")</a>
+                }
+            </div>
+        </section>
+    }
+    else
+    {
+        @* ---------- Lesson ---------- *@
+        <article class="ip-card ip-card-pad ip-lesson">
+            <p class="ip-muted" style="font-weight:800;letter-spacing:.06em">LESSON @Model.Number OF @Model.Lessons.Length</p>
+            <h2 class="ip-h2" style="font-size:1.6rem;margin-bottom:14px">@l.Title</h2>
+            @foreach (var p in l.Paragraphs)
+            {
+                <p>@p</p>
+            }
+            <p class="ip-muted ip-attrib">
+                Content: @c.Provider@(string.IsNullOrWhiteSpace(c.LicenceType) ? "" : $" · Licence: {c.LicenceType}") ·
+                <a href="@c.OriginalUrl" target="_blank" rel="noopener">Original course ↗</a>
+            </p>
+        </article>
+
+        <section class="ip-card ip-card-pad" aria-labelledby="quiz-title">
+            <form method="post" asp-controller="Learn" asp-action="Answer" asp-route-courseId="@c.Id" asp-route-number="@Model.Number">
+                @if (l.HasQuiz)
+                {
+                    <h2 id="quiz-title" class="ip-h2">Quick check</h2>
+                    <fieldset class="ip-quiz">
+                        <legend>@l.Question</legend>
+                        @for (var i = 0; i < l.Options!.Length; i++)
+                        {
+                            var chosen = Model.ChosenAnswer == i;
+                            <label class="ip-option @(chosen && Model.AnsweredCorrectly == false ? "wrong" : null)">
+                                <input type="radio" name="answer" value="@i" required checked="@chosen" />
+                                <span>@l.Options[i]</span>
+                            </label>
+                        }
+                    </fieldset>
+                    @if (Model.AnsweredCorrectly == false)
+                    {
+                        <div class="ip-note" role="alert" style="margin:12px 0"><p><strong>Not quite — try again.</strong> Hint: @l.Explanation</p></div>
+                    }
+                    <button type="submit" class="ip-btn ip-btn-gold ip-btn-big" style="margin-top:12px">Check answer</button>
+                }
+                else
+                {
+                    <h2 id="quiz-title" class="ip-h2">Done with this lesson?</h2>
+                    <button type="submit" class="ip-btn ip-btn-gold ip-btn-big" style="margin-top:8px">Mark lesson complete</button>
+                }
+            </form>
+        </section>
+    }
+</div>

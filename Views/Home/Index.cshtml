@@ -1,0 +1,63 @@
+@model HomeLandingVm
+@{
+    ViewData["Title"] = null;          // the layout uses the full brand title on the home page
+    ViewData["FullBleed"] = true;      // the hero runs edge to edge, no footer
+    var signedIn = User.Identity?.IsAuthenticated == true;
+}
+
+@* South African flag, drawn in SVG (no image download). *@
+@functions {
+    private const string Flag = "<svg class='hx-flag' viewBox='0 0 90 60' aria-hidden='true'><rect width='90' height='30' fill='#E03C31'/><rect y='30' width='90' height='30' fill='#001489'/><path d='M0 0L37 30L0 60M37 30H90' stroke='#fff' stroke-width='20' fill='none'/><path d='M0 0L37 30L0 60M37 30H90' stroke='#007749' stroke-width='12' fill='none'/><path d='M0 4L32 30L0 56Z' fill='#FFB81C'/><path d='M0 10L25 30L0 50Z' fill='#000'/></svg>";
+}
+
+<section class="hx" aria-labelledby="hx-title">
+    <img class="hx-photo" src="~/img/landing/hero-students.jpg" alt="" fetchpriority="high" decoding="async" />
+    <div class="hx-veil" aria-hidden="true"></div>
+
+    <div class="hx-in">
+        <div>
+            <h1 id="hx-title" class="hx-name"><span>Ind</span><span>lela</span></h1>
+            <p class="hx-tag">Learn Free.<br />Prove It. <em>Get Hired.</em></p>
+            <p class="hx-lede">Access free digital courses, earn recognised skill badges, and connect directly with South African employers.</p>
+            <div class="hx-cta">
+                @if (signedIn)
+                {
+                    <a class="ix-btn-gold" href="/dashboard">Continue learning
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8" /></svg></a>
+                }
+                else
+                {
+                    <a class="ix-btn-gold" href="/account/register">Start Learning Free
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8" /></svg></a>
+                }
+                <a class="ix-btn-line" href="/employers">For Employers</a>
+            </div>
+        </div>
+
+        @* Example cards that show what learners get: roadmaps with progress, and job matches. *@
+        <div class="hx-cards" aria-label="What Indlela gives you">
+            <div class="hx-card">
+                <div class="hx-card-top">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E8B04B" stroke-width="2" aria-hidden="true"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5" /></svg>
+                    @Html.Raw(Flag)
+                </div>
+                <h3>Software Developer</h3>
+                <div class="hx-bar" role="img" aria-label="Roadmap 40% complete"><span style="width:40%"></span></div>
+            </div>
+            <div class="hx-card">
+                <div class="hx-card-top"><span>South African</span>@Html.Raw(Flag)</div>
+                <h3>Digital Marketing</h3>
+                <div class="hx-bar" role="img" aria-label="Roadmap 25% complete"><span style="width:25%"></span></div>
+            </div>
+            <div class="hx-card">
+                <h3 style="margin:0">Job Matching</h3>
+                <div class="hx-match">
+                    <span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4 4-6 8-6s8 2 8 6" /></svg></span>
+                    <span><b>Matched:</b>Junior Developer</span>
+                    <span class="ok" aria-hidden="true">✓</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>

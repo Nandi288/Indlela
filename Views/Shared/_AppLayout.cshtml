@@ -1,0 +1,118 @@
+@using System.Security.Claims
+@{
+    var title = ViewData["Title"] as string;
+    var path = Context.Request.Path.Value ?? "/";
+    var flash = TempData["Flash"] as string;
+    var flashIsError = TempData["FlashError"] as string == "true";
+    var signedIn = User.Identity?.IsAuthenticated == true;
+    var firstName = User.FindFirstValue(ClaimTypes.GivenName)
+                    ?? (User.Identity?.Name?.Split('@')[0] ?? "Learner");
+    var initial = firstName.Length > 0 ? char.ToUpperInvariant(firstName[0]).ToString() : "L";
+    var fullBleed = ViewData["FullBleed"] as bool? == true; // the home page hero runs edge to edge
+
+    string? Current(params string[] prefixes) =>
+        prefixes.Any(p => p == "/" ? path == "/" : path.StartsWith(p, StringComparison.OrdinalIgnoreCase)) ? "page" : null;
+}
+<!DOCTYPE html>
+<html lang="en-ZA" data-theme="dark">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@(string.IsNullOrEmpty(title) ? "Indlela — learn free, prove it, get hired" : $"{title} · Indlela")</title>
+    <meta name="description" content="Indlela turns free learning into proven skills and real job opportunities for South Africans." />
+    <meta name="theme-color" content="#0A2A20" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=DM+Sans:wght@400;500;700&display=swap" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/indlela-base.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/indlela.css" asp-append-version="true" />
+    <link rel="icon" href="~/favicon.ico" />
+    @await RenderSectionAsync("Head", required: false)
+</head>
+<body class="app-body ix">
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    @* ---------- Top navigation ---------- *@
+    <header class="ix-nav">
+        <div class="ix-nav-in">
+            <a class="ix-brand" href="@(signedIn ? "/dashboard" : "/")" aria-label="Indlela home">
+                <svg class="ix-mark" viewBox="0 0 32 32" aria-hidden="true">
+                    <rect width="32" height="32" rx="8" fill="#F3EEDF" />
+                    <path d="M9 26c0-6 14-6 14-12S13 8 13 5" fill="none" stroke="#0B5D3B" stroke-width="3" stroke-linecap="round" />
+                    <circle cx="13" cy="5" r="2.6" fill="#F0B43C" />
+                </svg>
+                <span class="ix-word">Indlela</span>
+            </a>
+
+            @* Phone menu: a checkbox toggle, so it works without JavaScript. *@
+            <input type="checkbox" id="ix-menu" class="ix-menu-toggle" aria-label="Show menu" />
+            <label for="ix-menu" class="ix-menu-btn" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" /></svg></label>
+                <nav class="ix-links" aria-label="Main">
+                    @if (signedIn)
+                    {
+                        <a href="/dashboard" aria-current="@Current("/dashboard")">My path</a>
+                        <a href="/paths" aria-current="@Current("/paths", "/courses", "/learn")">Discover</a>
+                        <a href="/portfolio" aria-current="@Current("/portfolio", "/p/")">Portfolio</a>
+                        <a href="/jobs" aria-current="@Current("/jobs")">Jobs</a>
+                        <a href="/badges" aria-current="@Current("/badges")">Badges</a>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <a href="/admin" aria-current="@Current("/admin")">Admin</a>
+                        }
+                    }
+                    else
+                    {
+                        <a href="/paths" aria-current="@Current("/paths", "/courses")">Discover</a>
+                        <a href="/badges" aria-current="@Current("/badges")">Badges</a>
+                        <a href="/jobs" aria-current="@Current("/jobs")">Jobs</a>
+                        <a href="/about" aria-current="@Current("/about")">About Us</a>
+                    }
+                </nav>
+
+            <div class="ix-actions">
+                @await RenderSectionAsync("TopBar", required: false)
+                @if (signedIn)
+                {
+                    <a class="ix-user" href="/portfolio" title="My portfolio">
+                        <span class="ix-avatar" aria-hidden="true">@initial</span>
+                        <span class="ix-user-name">@firstName</span>
+                    </a>
+                    <form method="post" asp-controller="Account" asp-action="Logout" class="ix-logout">
+                        <button type="submit" class="ix-btn-line ix-btn-sm">Log out</button>
+                    </form>
+                }
+                else
+                {
+                    <a class="ix-btn-line" href="/account/login">Log In / Register</a>
+                }
+            </div>
+        </div>
+    </header>
+
+    @if (!string.IsNullOrEmpty(flash))
+    {
+        <div class="app-flash ix-flash @(flashIsError ? "error" : null)" role="@(flashIsError ? "alert" : "status")"><p>@flash</p></div>
+    }
+
+    <main id="main" class="app-content @(fullBleed ? "ix-main-full" : "ix-main")">
+        @if (IsSectionDefined("Sidebar"))
+        {
+            <div class="ix-aside">@await RenderSectionAsync("Sidebar")</div>
+        }
+        @RenderBody()
+    </main>
+
+    @if (!fullBleed)
+    {
+        <footer class="app-foot ix-foot">
+            <span>Free courses belong to their providers. We always link to the original. Badges are Indlela recognition, not accredited qualifications.</span>
+            <span class="ix-foot-links"><a href="/about">About</a> · <a href="/employers">For employers</a> · <a href="/privacy">Privacy &amp; POPIA</a></span>
+        </footer>
+    }
+
+    <script src="~/js/site.js" asp-append-version="true" defer></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

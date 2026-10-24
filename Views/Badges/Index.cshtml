@@ -1,0 +1,50 @@
+@model List<BadgeRowVm>
+@{
+    ViewData["Title"] = "Badges";
+    var signedIn = ViewData["SignedIn"] as bool? == true;
+    var earned = Model.Count(r => r.EarnedAt.HasValue);
+}
+
+<div class="ix-page">
+    <div class="ix-head">
+        <div>
+            <p class="ix-kicker">Badges</p>
+            <h1 class="ix-title">Earn badges as you prove your skills</h1>
+            <p class="ix-lede">Badges mark real milestones. Verified badges only count progress from Indlela quizzes or synced from the course provider.@(signedIn ? $" You've earned {earned} of {Model.Count}." : "")</p>
+        </div>
+        @if (!signedIn)
+        {
+            <a class="ix-btn-gold" href="/account/register">Start earning free</a>
+        }
+    </div>
+
+    @if (Model.Count == 0)
+    {
+        <div class="ix-glass"><p class="ix-muted" style="margin:0">Badges are on their way.</p></div>
+    }
+    else
+    {
+        <div class="ix-grid">
+            @foreach (var r in Model)
+            {
+                var got = r.EarnedAt.HasValue;
+                <article class="ix-glass bd @(got ? null : "locked")">
+                    <div class="bd-gem" aria-hidden="true"><span>@(got ? "✓" : "?")</span></div>
+                    <div>
+                        <h3>@r.Badge.Name</h3>
+                        <p class="ix-muted" style="margin:0 0 6px">@r.Badge.Criteria</p>
+                        @if (got)
+                        {
+                            <span class="ix-tag gold">Earned @r.EarnedAt!.Value.ToString("d MMM yyyy")</span>
+                        }
+                        else if (r.Badge.IsVerifiedOnly)
+                        {
+                            <span class="ix-tag green">Verified progress only</span>
+                        }
+                    </div>
+                </article>
+            }
+        </div>
+    }
+    <p class="ix-muted" style="margin:0;font-size:.9rem">Badges are Indlela recognition, not accredited qualifications.</p>
+</div>

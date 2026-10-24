@@ -1,0 +1,154 @@
+@* The simulated provider's own website look — deliberately NOT Indlela's design, so the handoff is obvious in a demo. *@
+@{
+    // Each page can say where "Back to Indlela" should go (the course it came from). Defaults to the dashboard.
+    var backUrl = ViewData["BackUrl"] as string ?? "/dashboard";
+    var backLabel = ViewData["BackLabel"] as string ?? "Back to Indlela";
+    var provider = (string?)ViewData["Provider"] ?? "Provider";
+}
+<!DOCTYPE html>
+<html lang="en" data-mode="light">
+<head>
+    @* Follow the light/dark choice the learner made in Indlela (same browser), else the system setting. *@
+    <script>
+        (function () {
+            var m = 'light';
+            try { m = localStorage.getItem('indlela-mode') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); } catch (e) { }
+            document.documentElement.setAttribute('data-mode', m);
+        })();
+    </script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] · @provider</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --p: #4338CA; --p-dark: #312E81; --p-soft: #EEF2FF; --p-line: #C7D2FE;
+            --bg: #F5F6FB; --card: #FFFFFF; --ink: #111827; --muted: #4B5563; --line: #E5E7EB; --field: #FFFFFF; --field-line: #D1D5DB;
+            --ok: #059669; --ok-soft: #ECFDF5; --ok-line: #A7F3D0; --locked: #9CA3AF;
+            --shadow: 0 1px 2px rgba(17, 24, 39, .05), 0 8px 24px rgba(17, 24, 39, .06);
+        }
+        html[data-mode="dark"] {
+            color-scheme: dark;
+            --p: #818CF8; --p-dark: #A5B4FC; --p-soft: #1E1B4B; --p-line: #3730A3;
+            --bg: #0B0F1A; --card: #131A2A; --ink: #E5E7EB; --muted: #9CA3AF; --line: #253047; --field: #0F1524; --field-line: #334155;
+            --ok: #34D399; --ok-soft: #052E22; --ok-line: #065F46; --locked: #64748B;
+            --shadow: 0 1px 2px rgba(0, 0, 0, .4);
+        }
+        * { box-sizing: border-box; }
+        body { margin: 0; font: 16px/1.6 "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif; color: var(--ink); background: var(--bg); }
+        a { color: var(--p); }
+        :focus-visible { outline: 3px solid #F59E0B; outline-offset: 2px; }
+
+        /* Demo strip: always dark, so it's obvious this is a simulation */
+        .sim { background: #111827; color: #F9FAFB; font-size: .85rem; padding: 8px 16px; display: flex; justify-content: space-between; align-items: center; gap: 8px 16px; flex-wrap: wrap; }
+        .sim a { color: #FCD34D; font-weight: 700; }
+
+        .top { background: var(--card); border-bottom: 1px solid var(--line); }
+        .top .in { max-width: 1080px; margin: 0 auto; padding: 14px 20px; display: flex; align-items: center; gap: 12px; }
+        .logo { width: 38px; height: 38px; border-radius: 10px; background: linear-gradient(135deg, #4338CA, #7C3AED); color: #fff; display: grid; place-items: center; font-weight: 800; flex-shrink: 0; }
+        .brand { font-weight: 800; font-size: 1.15rem; }
+        .top .tag { margin-left: auto; font-size: .9rem; color: var(--muted); }
+
+        .wrap { max-width: 1080px; margin: 0 auto; padding: 24px 20px 64px; }
+        .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 24px; margin-bottom: 18px; box-shadow: var(--shadow); }
+        h1 { font-size: clamp(1.6rem, 4vw, 2.1rem); line-height: 1.2; margin: 0 0 8px; }
+        h2 { font-size: 1.15rem; margin: 0 0 12px; }
+        .muted { color: var(--muted); }
+
+        /* Flash after each action, with the way back to Indlela right inside it */
+        .note { background: var(--p-soft); border: 1px solid var(--p-line); border-radius: 10px; padding: 12px 14px; margin-bottom: 16px; }
+        .ok { background: var(--ok-soft); border-color: var(--ok-line); }
+        .flash { display: flex; align-items: center; justify-content: space-between; gap: 10px 16px; flex-wrap: wrap; }
+        .flash p { margin: 0; display: flex; align-items: center; gap: 10px; }
+        .flash p::before { content: "✓"; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--ok); color: #fff; font-weight: 800; font-size: .8rem; flex-shrink: 0; }
+
+        /* Buttons */
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; padding: 0 20px; border-radius: 8px; border: 1px solid transparent; background: #4338CA; color: #fff; font-family: inherit; font-size: 1rem; font-weight: 600; line-height: 1; cursor: pointer; text-decoration: none; white-space: nowrap; }
+        .btn:hover { background: #312E81; color: #fff; }
+        .btn.ghost { background: transparent; color: var(--p); border-color: var(--p); }
+        .btn.ghost:hover { background: var(--p-soft); color: var(--p); }
+        .btn.sm { min-height: 38px; padding: 0 14px; font-size: .92rem; }
+        .btn.block { width: 100%; }
+        .btns { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+
+        /* Forms */
+        label { display: block; font-weight: 600; font-size: .9rem; margin: 12px 0 4px; }
+        input[type=text], input[type=email], input[type=password] { width: 100%; min-height: 44px; padding: 8px 12px; border: 1px solid var(--field-line); border-radius: 8px; font: inherit; background: var(--field); color: var(--ink); }
+        input.filled { background: var(--ok-soft); border-color: var(--ok); }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
+
+        /* Course hero */
+        .hero { background: linear-gradient(120deg, #312E81 0%, #4338CA 55%, #6D28D9 100%); color: #fff; border: 0; padding: 28px; }
+        .hero .kicker { margin: 0 0 6px; font-size: .8rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #C7D2FE; }
+        .hero p { color: #E0E7FF; margin: 0; max-width: 62ch; }
+        .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; padding: 0; list-style: none; }
+        .chips li { font-size: .8rem; font-weight: 600; padding: 4px 10px; border-radius: 999px; background: rgba(255, 255, 255, .14); border: 1px solid rgba(255, 255, 255, .25); }
+
+        /* Two columns: modules + sync panel */
+        .cols { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 18px; align-items: start; }
+        .side { position: sticky; top: 16px; }
+
+        /* Progress */
+        .bar { height: 10px; background: var(--line); border-radius: 999px; overflow: hidden; margin: 10px 0 6px; }
+        .bar span { display: block; height: 100%; background: linear-gradient(90deg, #4338CA, #7C3AED); border-radius: inherit; }
+        .big { font-size: 2.2rem; font-weight: 800; line-height: 1; }
+        .sync { display: flex; align-items: center; gap: 8px; font-size: .88rem; color: var(--muted); margin: 14px 0 0; padding-top: 14px; border-top: 1px solid var(--line); }
+        .sync i { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 4px var(--ok-soft); flex-shrink: 0; }
+
+        /* Module stepper */
+        .mods { list-style: none; margin: 0; padding: 0; }
+        .mods li { position: relative; display: flex; align-items: center; gap: 14px; padding: 14px 12px; margin: 0 -12px; border-radius: 10px; }
+        .mods li + li { margin-top: 4px; }
+        .mods li:not(:last-child)::after { content: ""; position: absolute; left: 28px; top: 50px; bottom: -18px; width: 2px; background: var(--line); }
+        .mods li.done:not(:last-child)::after { background: var(--ok); }
+        .mods .n { position: relative; z-index: 1; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--card); border: 2px solid var(--line); color: var(--muted); font-weight: 800; flex-shrink: 0; }
+        .mods .t { flex: 1; min-width: 0; font-weight: 600; }
+        .mods .t small { display: block; font-weight: 400; font-size: .82rem; color: var(--muted); }
+        .mods .done .n { background: var(--ok); border-color: var(--ok); color: #fff; }
+        .mods .next { background: var(--p-soft); }
+        .mods .next .n { background: #4338CA; border-color: #4338CA; color: #fff; }
+        .mods .locked .t, .mods .locked .state { color: var(--locked); }
+        .mods form { margin: 0; }
+        .state { font-size: .88rem; font-weight: 600; color: var(--ok); white-space: nowrap; }
+
+        .done-card { border-color: var(--ok-line); background: var(--ok-soft); }
+
+        @@media (max-width: 860px) {
+            .cols { grid-template-columns: 1fr; }
+            .side { position: static; order: -1; }
+        }
+        @@media (max-width: 640px) {
+            .grid { grid-template-columns: 1fr; }
+            .top .tag { display: none; }
+            .hero { padding: 22px 20px; }
+            .card { padding: 20px; }
+            .mods li { flex-wrap: wrap; }
+            .mods li:not(:last-child)::after { display: none; }
+            .mods form, .mods form .btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="sim" role="note">
+        <span><strong>Simulated provider website</strong> — in real life this is the provider's own site, e.g. a SETA or MOOC platform.</span>
+        <a href="@backUrl">← @backLabel</a>
+    </div>
+    <header class="top">
+        <div class="in">
+            <span class="logo" aria-hidden="true">@provider[0]</span>
+            <span class="brand">@provider</span>
+            <span class="tag">Free online learning</span>
+        </div>
+    </header>
+    <main class="wrap">
+        @if (TempData["ProviderFlash"] is string msg)
+        {
+            <div class="note ok flash" role="status">
+                <p>@msg</p>
+                <a class="btn ghost sm" href="@backUrl">See it on Indlela →</a>
+            </div>
+        }
+        @RenderBody()
+    </main>
+</body>
+</html>

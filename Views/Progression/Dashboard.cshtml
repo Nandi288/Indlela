@@ -1,0 +1,378 @@
+@model PathDashboardVm
+@{
+    ViewData["Title"] = "My path";
+    var m = Model;
+
+    // Fixed path geometry (viewBox 1000×210). Bead positions match DashboardService.StopPositions.
+    const string PathD = "M30 160 C 150 160, 170 60, 290 60 S 430 160, 550 160 S 710 60, 830 60 S 940 120, 975 120";
+    (int X, int Y)[] beadAt = [(30, 160), (290, 60), (550, 160), (830, 60)];
+    var showNextStop = m.Stops.Count < beadAt.Length;
+    var firstOpen = m.Stops.ToList().FindIndex(s => !s.IsDone);
+
+    string StopState(PathStopVm s) => s.IsDone ? "done"
+        : s.Course.IsAwaitingConfirmation ? "waiting to confirm"
+        : s.Course.Percentage > 0 ? $"{s.Course.Percentage} percent" : "not started";
+    var pathLabel = m.Stops.Count == 0
+        ? $"Your path is empty. Your {m.GoalLabel} is at the end."
+        : "Your path: " + string.Join("; ", m.Stops.Select(s => $"{s.Course.Title}, {StopState(s)}")) + $"; then your {m.GoalLabel}.";
+
+    string DetailsUrl(PathCourseVm c) => Url.Action("Details", "Courses", new { id = c.CourseId, slug = c.Slug })!;
+    string DotClass(PathCourseVm c) => c.IsAwaitingConfirmation ? "ask" : c.IsCompleted ? "done" : c.LearnHere ? "" : "provider";
+    string PillClass(PathCourseVm c) => c.IsAwaitingConfirmation ? "ip-pill-ask" : c.IsCompleted ? "ip-pill-done" : c.LearnHere ? "ip-pill-here" : "ip-pill-provider";
+    var weekDays = new[] { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" };
+}
+
+@section TopBar {
+    @if (m.SkillAlertCount > 0)
+    {
+        <a class="ip-btn ip-btn-alert" href="/tech-pulse">Tech Pulse: @m.SkillAlertCount skill @(m.SkillAlertCount == 1 ? "alert" : "alerts")</a>
+    }
+}
+
+@section Sidebar {
+    <div class="ip-week">
+        <span class="ip-week-label">THIS WEEK</span>
+        <ul class="ip-week-days" aria-label="Days you learned this week">
+            @for (var d = 0; d < m.ActiveDaysThisWeek.Count; d++)
+            {
+                <li class="@(m.ActiveDaysThisWeek[d] ? "on" : null)" title="@weekDays[d]"><span class="sr-only">@weekDays[d]: @(m.ActiveDaysThisWeek[d] ? "active" : "no activity")</span></li>
+            }
+        </ul>
+        <span class="ip-week-text">
+            @(m.StreakDays switch
+            {
+                0 => "Log progress to start a streak",
+                1 => "1-day streak · keep going",
+                var n => $"{n}-day streak · keep going"
+            })
+        </span>
+    </div>
+}
+
+<div class="ip-page">
+    @* Forecast + quick links (Smart Start, portfolio and job matching) *@
+    @if (ViewData["Forecast"] is ForecastVm forecast)
+    {
+        <partial name="_Forecast" model="forecast" />
+    }
+    else
+    {
+        <section class="ix-glass fc"><div class="fc-ring" style="background:rgba(255,255,255,.08)">?</div>
+            <div><h2>Pick a roadmap to get your forecast</h2><p>Indlela predicts when you'll be job-ready once you follow a roadmap.</p></div>
+            <a class="ix-btn-gold ix-btn-sm" href="/start">Smart Start</a></section>
+    }
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <a class="ix-btn-line ix-btn-sm" href="/portfolio">My skills portfolio</a>
+        <a class="ix-btn-line ix-btn-sm" href="/jobs">Jobs that match me</a>
+        <a class="ix-btn-line ix-btn-sm" href="/start">Redo Smart Start</a>
+    </div>
+
+    @* ---------- Greeting + the one main action ---------- *@
+    <div class="ip-head">
+        <div>
+            <p class="ip-greet">Sawubona, @m.FirstName</p>
+            <h1 class="ip-title">Your path so far</h1>
+        </div>
+        @if (m.ContinueCourse is { } next)
+        {
+            if (next.LearnHere)
+            {
+                <a class="ip-btn ip-btn-gold ip-btn-big" href="/learn/@next.CourseId">
+                    Continue: @next.Title
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+                </a>
+            }
+            else
+            {
+                <a class="ip-btn ip-btn-gold ip-btn-big" href="@next.OriginalUrl" target="_blank" rel="noopener">
+                    Continue: @next.Title <span aria-hidden="true">↗</span><span class="sr-only">(opens @next.Provider)</span>
+                </a>
+            }
+        }
+        else
+        {
+            <a class="ip-btn ip-btn-gold ip-btn-big" href="/courses">Find your first course</a>
+        }
+    </div>
+
+    @* ---------- Path hero ---------- *@
+    <section class="ip-card ip-hero" aria-labelledby="path-title">
+        <div class="ip-hero-strand" aria-hidden="true"></div>
+        <div class="ip-hero-body">
+            <div class="ip-hero-top">
+                <div>
+                    <h2 id="path-title">Towards your @m.GoalLabel</h2>
+                    <p class="ip-hero-sub">Every course you finish is a bead on the path — here or on a provider site.</p>
+                </div>
+                <div class="ip-hero-num">
+                    @if (m.AveragePercent is int avg)
+                    {
+                        <b>@avg%</b>
+                        <span>average progress · @m.UpdatesThisMonth @(m.UpdatesThisMonth == 1 ? "update" : "updates") this month</span>
+                    }
+                    else
+                    {
+                        <b>Start</b>
+                        <span>your first course puts the first bead down</span>
+                    }
+                </div>
+            </div>
+
+            <svg class="ip-path" viewBox="0 0 1000 214" role="img" aria-label="@pathLabel">
+                <path d="@PathD" fill="none" stroke="rgba(255,255,255,.28)" stroke-width="6" stroke-linecap="round" stroke-dasharray="2 14" />
+                @if (m.PathFillPercent > 0)
+                {
+                    <path d="@PathD" fill="none" stroke="#F2A900" stroke-width="8" stroke-linecap="round" pathLength="100" stroke-dasharray="@m.PathFillPercent 100" />
+                }
+
+                @for (var i = 0; i < m.Stops.Count; i++)
+                {
+                    var s = m.Stops[i];
+                    var (x, y) = beadAt[i];
+                    var labelY = y > 100 ? y + 42 : y - 32;
+                    var anchor = i == 0 ? "start" : "middle";
+                    var labelX = i == 0 ? x - 14 : x;
+                    var isCurrent = i == firstOpen;
+                    <a href="@DetailsUrl(s.Course)">
+                        <title>@s.Course.Title — @StopState(s)</title>
+                        @if (s.IsDone)
+                        {
+                            <circle cx="@x" cy="@y" r="16" fill="#F2A900" />
+                            <path d="@($"M{x - 7} {y} l5 5 9 -10")" fill="none" stroke="#1B1F23" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+                        }
+                        else if (s.Course.Percentage > 0)
+                        {
+                            <g>
+                                <circle cx="@x" cy="@y" r="21" fill="#FFFFFF" stroke="#F2A900" stroke-width="5" />
+                                <text x="@x" y="@(y + 5)" text-anchor="middle" font-size="13" font-weight="800" fill="#0B5D3B">@s.Course.Percentage%</text>
+                            </g>
+                        }
+                        else
+                        {
+                            <circle cx="@x" cy="@y" r="14" fill="#0B5D3B" stroke="rgba(255,255,255,.7)" stroke-width="3" />
+                        }
+                        <text class="ip-lbl" x="@labelX" y="@labelY" text-anchor="@anchor" font-size="@(isCurrent ? 15 : 13)" font-weight="@(isCurrent ? 900 : 700)" fill="@(isCurrent ? "#FFFFFF" : "#DCEBE2")">@(s.ShortTitle + (s.IsDone ? " · done" : ""))</text>
+                    </a>
+                }
+
+                @if (showNextStop)
+                {
+                    var (nx, ny) = beadAt[m.Stops.Count];
+                    <a href="/courses">
+                        <title>Find your next course</title>
+                        <circle cx="@nx" cy="@ny" r="14" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="3" stroke-dasharray="4 4" />
+                        <text class="ip-lbl" x="@(m.Stops.Count == 0 ? nx - 14 : nx)" y="@(ny > 100 ? ny + 42 : ny - 32)" text-anchor="@(m.Stops.Count == 0 ? "start" : "middle")" font-size="13" font-weight="700" fill="#F2A900">+ Add your next course</text>
+                    </a>
+                }
+
+                <rect x="961" y="106" width="28" height="28" rx="4" transform="rotate(45 975 120)" fill="#FFFFFF" />
+                <text class="ip-lbl" x="990" y="172" text-anchor="end" font-size="13" font-weight="900" fill="#F2A900">@m.GoalLabel</text>
+            </svg>
+
+            @* Phones: the drawn labels get too small, so the same stops are listed in readable text. *@
+            <ol class="ip-stops" aria-hidden="true">
+                @foreach (var s in m.Stops)
+                {
+                    <li class="@(s.IsDone ? "done" : s.Course.Percentage > 0 ? "on" : null)">
+                        <a href="@DetailsUrl(s.Course)">@s.Course.Title</a>
+                        <span>@(s.IsDone ? "Done" : s.Course.IsAwaitingConfirmation ? "Confirm sign-up" : s.Course.Percentage > 0 ? $"{s.Course.Percentage}%" : "Not started")</span>
+                    </li>
+                }
+                <li class="goal"><span>@m.GoalLabel</span></li>
+            </ol>
+        </div>
+    </section>
+
+    @* ---------- Stats ---------- *@
+    <div class="ip-stats">
+        <div class="ip-card ip-stat">
+            <span class="ip-stat-label">Active courses</span>
+            <span class="ip-stat-num">@(m.ActiveHere + m.ActiveOnProvider)</span>
+            <div class="ip-stat-pills">
+                <span class="ip-pill ip-pill-here">@m.ActiveHere learn here</span>
+                <span class="ip-pill ip-pill-provider">@m.ActiveOnProvider on provider</span>
+            </div>
+        </div>
+        <div class="ip-card ip-stat">
+            <span class="ip-stat-label">Verified credits</span>
+            <span class="ip-stat-num">@m.VerifiedCredits</span>
+            <p class="ip-muted">From in-app quizzes and provider-verified completions</p>
+        </div>
+        <div class="ip-card ip-stat">
+            <span class="ip-stat-label">Waiting on you</span>
+            <span class="ip-stat-num" style="color:@(m.AwaitingCount > 0 ? "var(--danger)" : "var(--primary)")">@m.AwaitingCount</span>
+            @if (m.FirstAwaiting is { } ask)
+            {
+                <a href="#course-@ask.EnrollmentId">Confirm your @ask.Title sign-up →</a>
+            }
+            else
+            {
+                <p class="ip-muted">Nothing to confirm — you're all caught up.</p>
+            }
+        </div>
+    </div>
+
+    @* ---------- Momentum + badges ---------- *@
+    <div class="ip-duo">
+        <section class="ip-card ip-panel" aria-labelledby="mom-title">
+            <div class="ip-panel-head">
+                <div>
+                    <h2 id="mom-title" class="ip-h2">Learning momentum</h2>
+                    <p class="ip-muted" style="margin-top:6px">Progress updates each week — more beads, more learning</p>
+                </div>
+                @if (m.MomentumChangePercent is int change)
+                {
+                    <span class="ip-pill @(change >= 0 ? "ip-pill-here" : "ip-pill-self")">@(change >= 0 ? "+" : "−")@Math.Abs(change)%</span>
+                }
+            </div>
+            @if (m.Momentum.All(w => w.Updates == 0))
+            {
+                <p class="ip-muted">Your momentum appears here once you log progress. Every update adds a bead.</p>
+            }
+            <ul class="ip-beads" aria-label="Progress updates per week, last 8 weeks">
+                @foreach (var w in m.Momentum)
+                {
+                    <li class="@(w.IsCurrent ? "now" : null)">
+                        <span class="sr-only">@(w.IsCurrent ? "This week" : $"Week {w.Label}"): @w.Updates @(w.Updates == 1 ? "update" : "updates")</span>
+                        @for (var b = 0; b < w.Beads; b++)
+                        {
+                            <i aria-hidden="true"></i>
+                        }
+                    </li>
+                }
+            </ul>
+            <ul class="ip-bead-labels" aria-hidden="true">
+                @foreach (var w in m.Momentum)
+                {
+                    <li>@w.Label</li>
+                }
+            </ul>
+        </section>
+
+        <section class="ip-card ip-panel" id="badges" aria-labelledby="badge-title">
+            <div class="ip-panel-head"><h2 id="badge-title" class="ip-h2">Badges</h2><span class="ip-muted">@m.Badges.Count earned</span></div>
+            @if (m.Badges.Count == 0)
+            {
+                <p class="ip-muted">No badges yet. Log progress on any course to earn your first one.</p>
+            }
+            else
+            {
+                <ul class="ip-badges">
+                    @foreach (var b in m.Badges)
+                    {
+                        <li title="@b.Description — earned @b.DateAwarded.ToString("d MMM yyyy")">
+                            <span class="ip-diamond tone-@b.Tone" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10" /></svg></span>
+                            <span class="ip-badge-name">@b.Name</span>
+                            @if (b.IsSelfReportedEvidence)
+                            {
+                                <span class="ip-pill ip-pill-self">Self-reported</span>
+                            }
+                        </li>
+                    }
+                </ul>
+            }
+            @if (m.NextBadge is { } nb)
+            {
+                <div class="ip-next">
+                    <div class="ip-next-row"><strong>Next: @nb.Name</strong><span class="ip-muted">@nb.ProgressText</span></div>
+                    <div class="ip-beadbar" role="progressbar" aria-valuenow="@nb.Percent" aria-valuemin="0" aria-valuemax="100" aria-label="Progress towards @nb.Name"><span style="width:@nb.Percent%"></span></div>
+                </div>
+            }
+            <p class="ip-disclaimer">Indlela badges recognise effort. They are not accredited qualifications.</p>
+        </section>
+    </div>
+
+    @* ---------- Courses ---------- *@
+    <section class="ip-card ip-courses" id="my-courses" aria-labelledby="courses-title">
+        <div class="ip-courses-head">
+            <h2 id="courses-title" class="ip-h2">My courses</h2>
+            <a class="ip-btn ip-btn-line" href="/courses">Explore more courses</a>
+        </div>
+
+        @if (m.IsEmpty)
+        {
+            <div class="ip-empty">
+                <h3>Let's put your first bead on the path</h3>
+                <p class="ip-muted">Search the catalogue, or start with a free beginner course you can learn right here.</p>
+                <div class="btn-row" style="margin-top:16px">
+                    <a class="ip-btn ip-btn-gold" href="/courses">Browse free courses</a>
+                    <a class="ip-btn ip-btn-line" href="/courses?mode=InApp">Courses you can learn here</a>
+                </div>
+            </div>
+        }
+        else
+        {
+            <ul class="ip-rows">
+                @foreach (var c in m.Courses)
+                {
+                    <li class="ip-row" id="course-@c.EnrollmentId">
+                        <div class="ip-row-title">
+                            <span class="ip-dot @DotClass(c)" aria-hidden="true"></span>
+                            <div style="min-width:0">
+                                <a href="@DetailsUrl(c)">@c.Title</a>
+                                <p class="ip-muted">@c.Provider</p>
+                            </div>
+                        </div>
+
+                        <div><span class="ip-pill @PillClass(c)">@c.ModeLabel</span></div>
+
+                        @if (c.IsAwaitingConfirmation)
+                        {
+                            <p class="ip-muted">Started @c.HandoffStartedAt.ToString("d MMM")</p>
+                        }
+                        else
+                        {
+                            <div class="ip-bar @(c.IsCompleted ? "done" : null)">
+                                <div role="progressbar" aria-valuenow="@c.Percentage" aria-valuemin="0" aria-valuemax="100" aria-label="@c.Title progress"><span style="width:@c.Percentage%"></span></div>
+                                <b>@c.Percentage%</b>
+                            </div>
+                        }
+
+                        <div class="ip-actions">
+                            @if (c.IsAwaitingConfirmation)
+                            {
+                                <form method="post" asp-controller="Courses" asp-action="ConfirmEnrollment">
+                                    <input type="hidden" name="enrollmentId" value="@c.EnrollmentId" />
+                                    <button type="submit" name="enrolled" value="true" class="ip-btn ip-btn-green">Yes, I'm registered</button>
+                                </form>
+                                <a class="ip-btn ip-btn-quiet" asp-controller="Courses" asp-action="Handoff" asp-route-id="@c.CourseId">Try again</a>
+                            }
+                            else if (c.IsCompleted)
+                            {
+                                <a class="ip-btn ip-btn-gold" href="/certificate/@c.EnrollmentId">Certificate</a>
+                            }
+                            else if (c.LearnHere)
+                            {
+                                <a class="ip-btn ip-btn-line" href="/learn/@c.CourseId">@(c.Percentage > 0 ? "Resume lesson" : "Start lesson")</a>
+                            }
+                            else
+                            {
+                                <a class="ip-btn ip-btn-gold" href="@c.OriginalUrl" target="_blank" rel="noopener">Continue <span aria-hidden="true">↗</span><span class="sr-only">on @c.Provider</span></a>
+                            }
+                        </div>
+
+                        @if (c.CanSelfReport)
+                        {
+                            <details class="ip-log">
+                                <summary>Log progress</summary>
+                                <p class="ip-muted">No live sync for this provider yet, so this is saved as self-reported.</p>
+                                <form method="post" asp-controller="Progression" asp-action="UpdateProgress" class="inline-form">
+                                    <input type="hidden" name="EnrollmentId" value="@c.EnrollmentId" />
+                                    <div class="field">
+                                        <label for="m-@c.EnrollmentId">Module or milestone</label>
+                                        <input id="m-@c.EnrollmentId" type="text" name="ModuleOrLessonName" maxlength="200" required placeholder="e.g. Module 2" />
+                                    </div>
+                                    <div class="field field-pct">
+                                        <label for="p-@c.EnrollmentId">% done</label>
+                                        <input id="p-@c.EnrollmentId" type="number" name="Percentage" min="0" max="100" value="@c.Percentage" required />
+                                    </div>
+                                    <button type="submit" class="ip-btn ip-btn-line">Save</button>
+                                </form>
+                            </details>
+                        }
+                    </li>
+                }
+            </ul>
+        }
+    </section>
+</div>

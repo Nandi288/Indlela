@@ -1,0 +1,81 @@
+@model TechPulseVm
+@{
+    ViewData["Title"] = "Tech Pulse";
+    TimeZoneInfo sast;
+    try { sast = TimeZoneInfo.FindSystemTimeZoneById("Africa/Johannesburg"); }
+    catch (TimeZoneNotFoundException) { sast = TimeZoneInfo.FindSystemTimeZoneById("South Africa Standard Time"); }
+    string Local(DateTime utc) => TimeZoneInfo.ConvertTimeFromUtc(DateTime.SpecifyKind(utc, DateTimeKind.Utc), sast).ToString("d MMM, HH:mm");
+    var skillStories = Model.Articles.Count(a => a.AlignedCourse is not null);
+}
+
+<div class="ip-page">
+    <div class="ip-head">
+        <div>
+            <p class="ip-greet">Tech Pulse</p>
+            <h1 class="ip-title">What's happening in SA tech</h1>
+        </div>
+        @if (Model.LastUpdatedUtc is DateTime updated)
+        {
+            <span class="ip-pill ip-pill-self">Updated @Local(updated) SAST · every 6 hours</span>
+        }
+    </div>
+
+    <section class="ip-card ip-hero" aria-labelledby="pulse-title">
+        <div class="ip-hero-strand" aria-hidden="true"></div>
+        <div class="ip-hero-body">
+            <h2 id="pulse-title" class="ip-hero-title">Read the headlines. <span class="accent">Learn the skill behind them.</span></h2>
+            <p class="ip-hero-text">
+                @if (skillStories > 0)
+                {
+                    <text>@skillStories @(skillStories == 1 ? "story links" : "stories link") straight to a free course — look for the gold “Learn this skill” button.</text>
+                }
+                else
+                {
+                    <text>When a story matches a free course, you'll see a gold “Learn this skill” button under it.</text>
+                }
+            </p>
+            @if (Model.Categories.Count > 1)
+            {
+                <ul class="ip-chips" style="margin-top:16px" aria-label="Filter by category">
+                    <li><a class="ip-chip" href="/tech-pulse" aria-current="@(Model.SelectedCategory is null ? "true" : null)">All</a></li>
+                    @foreach (var cat in Model.Categories)
+                    {
+                        <li><a class="ip-chip" href="/tech-pulse?category=@Uri.EscapeDataString(cat)" aria-current="@(cat == Model.SelectedCategory ? "true" : null)">@cat</a></li>
+                    }
+                </ul>
+            }
+        </div>
+    </section>
+
+    @if (Model.Articles.Count == 0)
+    {
+        <div class="ip-card ip-empty">
+            <h3>No headlines right now</h3>
+            <p class="ip-muted">We couldn't reach the news feed. Check back soon — meanwhile, browse free courses.</p>
+            <div class="btn-row" style="margin-top:16px"><a class="ip-btn ip-btn-gold" href="/courses">Browse free courses</a></div>
+        </div>
+    }
+    else
+    {
+        <ul class="ip-news-list">
+            @foreach (var a in Model.Articles)
+            {
+                <li class="ip-card ip-news">
+                    <div class="ip-news-meta">
+                        <span class="ip-pill ip-pill-here">@a.Category</span>
+                        <span>@(a.SourceName ?? "News") · @Local(a.PublishedAt)</span>
+                    </div>
+                    <h2><a href="@a.SourceUrl" target="_blank" rel="noopener">@a.Title <span class="sr-only">(opens publisher site)</span></a></h2>
+                    @if (!string.IsNullOrWhiteSpace(a.Summary))
+                    {
+                        <p>@a.Summary</p>
+                    }
+                    @if (a.AlignedCourse is { } course)
+                    {
+                        <a class="ip-skill" asp-controller="Courses" asp-action="Details" asp-route-id="@course.Id" asp-route-slug="@course.Slug">Learn this skill: @course.Title</a>
+                    }
+                </li>
+            }
+        </ul>
+    }
+</div>

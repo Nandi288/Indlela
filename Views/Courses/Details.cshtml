@@ -1,0 +1,171 @@
+@model CourseDetailsVm
+@{
+    var c = Model.Course;
+    ViewData["Title"] = c.Title;
+    var e = Model.MyEnrollment;
+    var learnHere = c.DeliveryMode == DeliveryMode.InApp;
+    var returnUrl = Uri.EscapeDataString(Context.Request.Path.Value ?? "/");
+}
+
+<div class="ip-page">
+    <p class="ip-crumb"><a href="/courses">← All courses</a></p>
+
+    @if (c.IsBeingReverified)
+    {
+        <div class="ip-note" role="status"><p>Some learners reported a problem with this course's link. We're re-checking it with the provider.</p></div>
+    }
+
+    @* ---------- Green hero: the course ---------- *@
+    <section class="ip-card ip-hero" aria-labelledby="course-title">
+        <div class="ip-hero-strand" aria-hidden="true"></div>
+        <div class="ip-hero-body">
+            <p class="ip-hero-text" style="margin:0 0 8px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#F2C54A">@c.Category · @c.Provider</p>
+            <h1 id="course-title" class="ip-hero-title">@c.Title</h1>
+            <div class="ip-course-pills" style="margin-top:14px">
+                <span class="ip-pill">@(c.NqfLevel is int n ? $"NQF {n}" : "Non-accredited")</span>
+                @if (c.IsFree)
+                {
+                    <span class="ip-pill ip-pill-gold">Free</span>
+                }
+                <span class="ip-pill">@(learnHere ? "Learn here" : "On provider ↗")</span>
+                @if (c.EstimatedHours is int hours)
+                {
+                    <span class="ip-pill">About @hours hours</span>
+                }
+            </div>
+            @if (!string.IsNullOrWhiteSpace(c.Description))
+            {
+                <p class="ip-hero-text">@c.Description</p>
+            }
+            <p class="ip-hero-text" style="font-size:.9rem">Offered by <strong>@c.Provider</strong> · <a href="@c.OriginalUrl" target="_blank" rel="noopener">View original course page ↗</a></p>
+        </div>
+    </section>
+
+    <div class="ip-with-side">
+        <div class="ip-stack">
+            <section class="ip-card ip-card-pad" aria-labelledby="facts-title">
+                <h2 id="facts-title" class="ip-h2">Course facts</h2>
+                <dl class="ip-facts">
+                    <dt>Provider</dt><dd>@c.Provider</dd>
+                    <dt>Category</dt><dd>@c.Category</dd>
+                    <dt>NQF level</dt><dd>@(c.NqfLevel?.ToString() ?? "Not stated")</dd>
+                    @if (c.Credits is int credits)
+                    {
+                        <dt>Credits</dt><dd>@credits</dd>
+                    }
+                    <dt>Accreditation</dt><dd>@(c.IsAccredited ? c.AccreditationBody ?? "Accredited" : "Non-accredited")</dd>
+                    <dt>Duration</dt><dd>@(c.EstimatedHours is int h ? $"About {h} hours" : "Self-paced")</dd>
+                    <dt>Language</dt><dd>@c.Language</dd>
+                    @if (!string.IsNullOrWhiteSpace(c.LicenceType))
+                    {
+                        <dt>Licence</dt><dd>@c.LicenceType</dd>
+                    }
+                    <dt>Last checked</dt><dd><time datetime="@c.LastVerifiedAt.ToString("yyyy-MM-dd")">@c.LastVerifiedAt.ToString("d MMM yyyy")</time></dd>
+                </dl>
+            </section>
+
+            <section class="ip-card ip-card-pad" aria-labelledby="where-title">
+                <h2 id="where-title" class="ip-h2">Where you'll learn</h2>
+                @if (learnHere)
+                {
+                    <p style="margin:0">This course is openly licensed, so you study it <strong>inside Indlela</strong>: text loads first, video only when you tap, and progress records itself. Content is credited to @c.Provider on every lesson.</p>
+                }
+                else
+                {
+                    <p style="margin:0">This course runs on <strong>@c.Provider</strong>'s site. We'll open their sign-up with your details already filled in — you review it and press Submit yourself.</p>
+                    @if (Model.ProviderStrategy == HandoffStrategy.Manual)
+                    {
+                        <p class="ip-muted" style="margin-top:10px">This provider doesn't support pre-filled links yet, so we'll give you one-tap copy buttons instead.</p>
+                    }
+                }
+            </section>
+        </div>
+
+        <aside class="ip-stack">
+            @* ---------- The one main action ---------- *@
+            <section class="ip-card ip-card-pad" aria-labelledby="act-title">
+                @if (e is not null && e.HandoffStatus == HandoffStatus.Enrolled)
+                {
+                    <h2 id="act-title" class="ip-h2">You're enrolled</h2>
+                    <div class="ip-bar @(e.IsCompleted ? "done" : null)" style="margin:6px 0 16px">
+                        <div role="progressbar" aria-valuenow="@e.CurrentPercentage" aria-valuemin="0" aria-valuemax="100" aria-label="Course progress"><span style="width:@e.CurrentPercentage%"></span></div>
+                        <b>@e.CurrentPercentage%</b>
+                    </div>
+                    <div class="ip-actions-col">
+                        @if (learnHere)
+                        {
+                            <a class="ip-btn ip-btn-gold ip-btn-big" href="/learn/@c.Id">@(e.IsCompleted ? "Review lessons" : "Continue learning")</a>
+                        }
+                        else
+                        {
+                            <a class="ip-btn ip-btn-gold ip-btn-big" href="@c.OriginalUrl" target="_blank" rel="noopener">Open on @c.Provider ↗</a>
+                        }
+                        @if (e.IsCompleted)
+                        {
+                            <a class="ip-btn ip-btn-line" href="/certificate/@e.Id">View certificate</a>
+                        }
+                        <a class="ip-btn ip-btn-quiet" href="/dashboard">See it on my path</a>
+                    </div>
+                }
+                else if (learnHere)
+                {
+                    <h2 id="act-title" class="ip-h2">Start now</h2>
+                    <p class="ip-muted" style="margin-bottom:16px">No extra sign-up. Just your Indlela account.</p>
+                    <div class="ip-actions-col">
+                        @if (Model.IsSignedIn)
+                        {
+                            <form method="post" asp-action="StartLearning" asp-route-id="@c.Id">
+                                <button type="submit" class="ip-btn ip-btn-gold ip-btn-big">Start learning</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <a class="ip-btn ip-btn-gold ip-btn-big" href="/account/register?returnUrl=@returnUrl">Create account to start</a>
+                            <a class="ip-btn ip-btn-quiet" href="/account/login?returnUrl=@returnUrl">I already have an account</a>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <h2 id="act-title" class="ip-h2">Enrol with one click</h2>
+                    @if (e?.HandoffStatus == HandoffStatus.HandoffStarted)
+                    {
+                        <div class="ip-note info" style="margin-bottom:12px"><p>You started signing up on @e.HandoffStartedAt.ToString("d MMM"). Did you finish? Answer on your path, or try again.</p></div>
+                    }
+                    <p class="ip-muted" style="margin-bottom:16px">We'll show you exactly what we share before anything leaves Indlela.</p>
+                    <div class="ip-actions-col">
+                        @if (Model.IsSignedIn)
+                        {
+                            <a class="ip-btn ip-btn-gold ip-btn-big" asp-action="Handoff" asp-route-id="@c.Id">Enroll Now</a>
+                        }
+                        else
+                        {
+                            <a class="ip-btn ip-btn-gold ip-btn-big" href="/account/register?returnUrl=@returnUrl">Create account to enrol</a>
+                            <a class="ip-btn ip-btn-quiet" href="/account/login?returnUrl=@returnUrl">I already have an account</a>
+                        }
+                    </div>
+                }
+            </section>
+
+            @if (Model.EarnableBadges.Count > 0)
+            {
+                <section class="ip-card ip-card-pad" aria-labelledby="earn-title">
+                    <h2 id="earn-title" class="ip-h2">Badges you can earn</h2>
+                    <ul class="ip-badge-rows">
+                        @foreach (var b in Model.EarnableBadges.Select((b, i) => (b, i)))
+                        {
+                            <li>
+                                <span class="ip-diamond ip-diamond-sm tone-@(b.i % 3)" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10" /></svg></span>
+                                <div>
+                                    <strong>@b.b.Name</strong>
+                                    <p class="ip-muted">@(b.b.Criteria + (b.b.IsVerifiedOnly ? " Verified progress only." : ""))</p>
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                    <p class="ip-disclaimer">Indlela badges recognise your effort. They are not accredited qualifications.</p>
+                </section>
+            }
+        </aside>
+    </div>
+</div>

@@ -1,0 +1,25 @@
+@model Indlela.Controllers.CertificateVm?
+@{
+    ViewData["Title"] = "Verify a certificate";
+}
+
+<div class="ip-page ip-page-narrow">
+    <div class="ip-head">
+        <div>
+            <p class="ip-greet">Verification</p>
+            <h1 class="ip-title">@(Model is null ? "Certificate not found" : "This certificate is genuine")</h1>
+        </div>
+    </div>
+
+    @if (Model is null)
+    {
+        <section class="ip-card ip-card-pad">
+            <p style="margin:0">We couldn't verify that certificate. The link may be incomplete, changed, or the course not yet completed.</p>
+        </section>
+    }
+    else
+    {
+        <div class="ip-note info"><p>Issued by Indlela to <strong>@Model.LearnerName</strong> for completing <strong>@Model.CourseTitle</strong> on @Model.CompletedAt.ToLocalTime().ToString("d MMMM yyyy"). @Model.VerifiedBy.</p></div>
+        <partial name="~/Views/Certificate/_Certificate.cshtml" model="Model" />
+    }
+</div>

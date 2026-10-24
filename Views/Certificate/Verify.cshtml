@@ -1,20 +1,35 @@
 @model Indlela.Controllers.CertificateVm?
 @{
     ViewData["Title"] = "Verify a certificate";
+    var tried = ViewData["TriedCode"] as string;
+    var heading = Model is not null ? "This certificate is genuine" : tried is null ? "Verify a certificate" : "Certificate not found";
 }
 
 <div class="ip-page ip-page-narrow">
     <div class="ip-head">
         <div>
             <p class="ip-greet">Verification</p>
-            <h1 class="ip-title">@(Model is null ? "Certificate not found" : "This certificate is genuine")</h1>
+            <h1 class="ip-title">@heading</h1>
         </div>
     </div>
 
     @if (Model is null)
     {
         <section class="ip-card ip-card-pad">
-            <p style="margin:0">We couldn't verify that certificate. The link may be incomplete, changed, or the course not yet completed.</p>
+            @if (tried is not null)
+            {
+                <p style="margin:0 0 14px">We couldn't find a completed certificate with that code. Check the code for typos; it looks like <strong>K7QM-4XPA-9T</strong>.</p>
+            }
+            else
+            {
+                <p style="margin:0 0 14px">Scan the QR code on an Indlela certificate, or type the certificate code printed on it.</p>
+            }
+            <form method="get" action="/certificate/verify" style="display:flex;gap:10px;flex-wrap:wrap">
+                <label for="cert-code" class="sr-only">Certificate code</label>
+                <input id="cert-code" name="code" value="@tried" placeholder="K7QM-4XPA-9T" maxlength="14" autocomplete="off"
+                       style="flex:1 1 200px;min-height:46px;padding:0 14px;border-radius:12px;border:1px solid var(--border-strong);background:var(--surface);color:var(--ink);font:600 1.05rem var(--font-body);letter-spacing:.06em;text-transform:uppercase" />
+                <button type="submit" class="ix-btn-gold">Verify</button>
+            </form>
         </section>
     }
     else

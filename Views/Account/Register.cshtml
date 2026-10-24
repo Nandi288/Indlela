@@ -7,9 +7,10 @@
 @* The browser draws dropdown lists itself; give the options readable colours on the dark design. *@
 @section Head {
     <style>
-        .app-body select { background-color: #0E3A2C; color: #F4F1E8; }
-        .app-body select option { background-color: #0E3A2C; color: #F4F1E8; }
-        .app-body select option:checked { background-color: #E8B04B; color: #17150D; }
+        html[data-theme="dark"] .app-body select { background-color: #0E3A2C; color: #F4F1E8; }
+        html[data-theme="dark"] .app-body select option { background-color: #0E3A2C; color: #F4F1E8; }
+        html[data-theme="dark"] .app-body select option:checked { background-color: #E8B04B; color: #17150D; }
+        html[data-theme="light"] .app-body select, html[data-theme="light"] .app-body select option { background-color: #FFFFFF; color: #17201B; }
     </style>
 }
 

@@ -112,18 +112,29 @@ builder.Services.AddScoped<ICourseImportService, CourseImportService>();
 builder.Services.AddScoped<ILinkChecker, LinkChecker>();
 builder.Services.AddHostedService<LinkCheckHostedService>();
 
-builder.Services.Configure<NewsOptions>(config.GetSection(NewsOptions.Section));
-builder.Services.AddHttpClient<INewsClient, NewsApiClient>((sp, http) =>
+// Tech Pulse: free RSS feeds from SA tech sites (no API key). Feeds can be changed under "News:Feeds".
+builder.Services.Configure<RssOptions>(config.GetSection(RssOptions.Section));
+builder.Services.AddHttpClient<INewsClient, RssNewsClient>(http =>
 {
-    var baseUrl = config[$"{NewsOptions.Section}:BaseUrl"] ?? "https://newsapi.org/v2/";
-    http.BaseAddress = new Uri(baseUrl);
-    http.Timeout = TimeSpan.FromSeconds(10);
+    http.Timeout = TimeSpan.FromSeconds(15);
     http.DefaultRequestHeaders.UserAgent.ParseAdd("Indlela/1.0 (+https://github.com/Nandi288)");
+    http.DefaultRequestHeaders.Accept.ParseAdd("application/rss+xml, application/atom+xml, application/xml, text/xml");
 });
 builder.Services.AddScoped<ITechPulseService, TechPulseService>();
 builder.Services.AddHostedService<TechPulseRefreshHostedService>();
 
-builder.Services.AddSingleton<IAppEmailSender, LoggingEmailSender>(); // swap for SendGrid / ACS
+// Email: real SMTP (e.g. Gmail with an app password) when Email:Smtp is set in user secrets / host settings,
+// otherwise emails are only written to the log.
+var smtp = config.GetSection("Email:Smtp").Get<SmtpOptions>() ?? new SmtpOptions();
+if (smtp.IsConfigured)
+{
+    builder.Services.AddSingleton(smtp);
+    builder.Services.AddSingleton<IAppEmailSender, SmtpEmailSender>();
+}
+else
+{
+    builder.Services.AddSingleton<IAppEmailSender, LoggingEmailSender>();
+}
 
 // ---------- Hangfire (when you add the packages in Indlela.csproj) ----------
 // builder.Services.AddHangfire(c => c.UseSqlServerStorage(config.GetConnectionString("IndlelaDb")));
@@ -172,5 +183,7 @@ await SeedData.InitialiseAsync(app.Services, seedDemoContent: demoMode);
 await RoadmapSeed.ApplyAsync(app.Services); // 3 starter roadmaps + Indlela Academy lessons (always, only adds what's missing)
 if (demoMode)
     await Indlela.Services.Demo.DemoSetup.ApplyAsync(app.Services); // simulated provider + demo news for the walkthrough
+else
+    await SeedData.HideDemoContentAsync(app.Services); // real mode: unpublish demo courses and remove demo news left from earlier runs
 
 app.Run();

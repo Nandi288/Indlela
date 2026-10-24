@@ -108,6 +108,7 @@ public class IndlelaDbContext : IdentityDbContext<ApplicationUser>
 
             // A learner has at most one enrollment per course.
             e.HasIndex(x => new { x.UserId, x.CourseId }).IsUnique();
+            e.HasIndex(x => x.CertificateCode).IsUnique().HasFilter("[CertificateCode] IS NOT NULL");
 
             // Conversion KPI + reminder jobs.
             e.HasIndex(x => new { x.HandoffStatus, x.HandoffStartedAt });

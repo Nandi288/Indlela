@@ -73,9 +73,7 @@ public class AccountController(
         var link = await BuildConfirmationLinkAsync(user);
 
         await email.SendAsync(user.Email!, "Verify your Indlela account",
-            $"<p>Sawubona {HtmlEncoder.Default.Encode(user.FirstName)},</p>" +
-            $"<p>Tap to verify your email (link valid for 24 hours):</p>" +
-            $"<p><a href=\"{HtmlEncoder.Default.Encode(link)}\">Verify my email</a></p>");
+            VerificationEmailBody(user.FirstName, link));
 
         logger.LogInformation("New learner registered: {UserId}", user.Id);
 
@@ -118,12 +116,15 @@ public class AccountController(
 
         // Demo mode: an account that registered but never verified gets its simulated inbox shown again,
         // but only once the password is proven correct (IsNotAllowed is returned before the password is checked).
-        if (result.IsNotAllowed && DemoMode.IsOn(config, env))
+        // Not verified yet, but the password is right: send a fresh verification link (the old one may be lost or expired).
+        if (result.IsNotAllowed)
         {
             var pending = await users.FindByEmailAsync(model.Email.Trim());
             if (pending is not null && !pending.EmailConfirmed && await users.CheckPasswordAsync(pending, model.Password))
             {
-                ViewData["DevConfirmationLink"] = await BuildConfirmationLinkAsync(pending);
+                var link = await BuildConfirmationLinkAsync(pending);
+                await email.SendAsync(pending.Email!, "Verify your Indlela account", VerificationEmailBody(pending.FirstName, link));
+                ViewData["DevConfirmationLink"] = DemoMode.IsOn(config, env) ? link : null;
                 return View("CheckEmail", pending.Email);
             }
         }
@@ -156,6 +157,12 @@ public class AccountController(
     }
 
     /// <summary>0821234567 → +27821234567.</summary>
+    internal static string VerificationEmailBody(string firstName, string link) =>
+        $"<p>Sawubona {HtmlEncoder.Default.Encode(firstName)},</p>" +
+        "<p>Welcome to Indlela. Tap the button below to verify your email address and start your roadmap. The link works for 24 hours.</p>" +
+        $"<p style=\"margin:24px 0\"><a href=\"{HtmlEncoder.Default.Encode(link)}\" style=\"background:#F0B43C;color:#17150D;text-decoration:none;font-weight:bold;padding:14px 26px;border-radius:999px;display:inline-block\">Verify my email</a></p>" +
+        $"<p style=\"font-size:13px;color:#5B6470\">If the button doesn't work, copy this link into your browser:<br>{HtmlEncoder.Default.Encode(link)}</p>";
+
     internal static string NormaliseSaMobile(string input) // also used by the mobile API
     {
         var digits = new string(input.Where(c => char.IsDigit(c) || c == '+').ToArray());

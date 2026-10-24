@@ -58,6 +58,7 @@ public class PortfolioEditInput
     [StringLength(120)] public string? Headline { get; set; }
     [StringLength(800)] public string? About { get; set; }
     [StringLength(800)] public string? InformalExperience { get; set; }
+    [StringLength(600)] public string? Education { get; set; }
     [StringLength(80)] public string? Location { get; set; }
     public bool ShowEmail { get; set; }
     public bool ShowPhone { get; set; }

@@ -245,6 +245,7 @@ public class CareerService(IndlelaDbContext db, IRoadmapService roadmaps) : ICar
     {
         var p = await EnsurePortfolioAsync(userId, ct);
         p.Headline = Clean(i.Headline); p.About = Clean(i.About); p.InformalExperience = Clean(i.InformalExperience);
+        p.Education = Clean(i.Education);
         p.Location = Clean(i.Location); p.ShowEmail = i.ShowEmail; p.ShowPhone = i.ShowPhone; p.IsPublic = i.IsPublic;
         p.UpdatedAt = DateTime.UtcNow;
         await db.SaveChangesAsync(ct);

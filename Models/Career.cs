@@ -42,6 +42,8 @@ public class PortfolioProfile
     [MaxLength(800)] public string? About { get; set; }
     /// <summary>Tutoring, a family business, volunteering… real experience many young people never get to show.</summary>
     [MaxLength(800)] public string? InformalExperience { get; set; }
+    /// <summary>School, matric year, college or university, one per line.</summary>
+    [MaxLength(600)] public string? Education { get; set; }
     [MaxLength(80)] public string? Location { get; set; }
     public bool ShowEmail { get; set; }
     public bool ShowPhone { get; set; }

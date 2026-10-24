@@ -433,6 +433,10 @@ namespace Indlela.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("CertificateCode")
+                        .HasMaxLength(12)
+                        .HasColumnType("nvarchar(12)");
+
                     b.Property<DateTime?>("CompletedAt")
                         .HasColumnType("datetime2");
 
@@ -482,6 +486,10 @@ namespace Indlela.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CertificateCode")
+                        .IsUnique()
+                        .HasFilter("[CertificateCode] IS NOT NULL");
 
                     b.HasIndex("CourseId");
 
@@ -680,6 +688,10 @@ namespace Indlela.Migrations
                     b.Property<string>("About")
                         .HasMaxLength(800)
                         .HasColumnType("nvarchar(800)");
+
+                    b.Property<string>("Education")
+                        .HasMaxLength(600)
+                        .HasColumnType("nvarchar(600)");
 
                     b.Property<string>("Headline")
                         .HasMaxLength(120)

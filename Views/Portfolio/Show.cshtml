@@ -79,6 +79,10 @@
             {
                 <section class="ix-glass"><h2>Experience</h2><p style="margin:0;white-space:pre-line">@p.InformalExperience</p></section>
             }
+            @if (!string.IsNullOrWhiteSpace(p.Education))
+            {
+                <section class="ix-glass"><h2>Education</h2><p style="margin:0;white-space:pre-line">@p.Education</p></section>
+            }
         </div>
 
         <div style="display:flex;flex-direction:column;gap:20px">
@@ -145,6 +149,8 @@
                         <textarea id="pf-about" name="About" maxlength="800" placeholder="Two or three sentences about you and the work you want.">@p.About</textarea>
                         <label for="pf-exp">Other experience</label>
                         <textarea id="pf-exp" name="InformalExperience" maxlength="800" placeholder="Tutoring, a family business, volunteering, church or community work…">@p.InformalExperience</textarea>
+                        <label for="pf-edu">Education</label>
+                        <textarea id="pf-edu" name="Education" maxlength="600" placeholder="Matric, Durban High School, 2022&#10;Diploma in IT (in progress), DUT">@p.Education</textarea>
                         <label class="pf-check"><input type="checkbox" name="ShowEmail" value="true" checked="@p.ShowEmail" /> Show my email on the public page</label>
                         <label class="pf-check"><input type="checkbox" name="ShowPhone" value="true" checked="@p.ShowPhone" /> Show my mobile number on the public page</label>
                         <label class="pf-check"><input type="checkbox" name="IsPublic" value="true" checked="@p.IsPublic" /> <b>Make my portfolio public</b></label>

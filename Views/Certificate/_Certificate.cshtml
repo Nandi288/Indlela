@@ -1,29 +1,65 @@
 @model Indlela.Controllers.CertificateVm
-<article class="ip-cert" aria-label="Certificate of achievement">
-    <div class="ip-hero-strand" aria-hidden="true"></div>
-    <div class="ip-cert-body">
-        <div class="ip-cert-brand">
-            <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#0B5D3B" /><path d="M9 26c0-6 14-6 14-12S13 8 13 5" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" /><circle cx="13" cy="5" r="2.6" fill="#F2A900" /></svg>
-            <span>Indlela</span>
-        </div>
-        <p class="ip-cert-kicker">Certificate of achievement</p>
-        <p class="ip-cert-small">This certifies that</p>
-        <p class="ip-cert-name">@Model.LearnerName</p>
-        <p class="ip-cert-small">has successfully completed</p>
-        <p class="ip-cert-course">@Model.CourseTitle</p>
-        <p class="ip-cert-small">offered by <strong>@Model.Provider</strong>@(Model.EstimatedHours is int h ? $" · about {h} hours of learning" : "")</p>
+@* A landscape A4 certificate. It stays paper-white in light and dark mode because it is printed. *@
+@{
+    var completed = Model.CompletedAt.ToLocalTime().ToString("d MMMM yyyy");
+    var sealWord = Model.IsVerified ? "VERIFIED" : "COMPLETED";
+}
+<div class="cx-wrap">
+    <article class="cx @(Model.IsVerified ? "is-verified" : "is-self")" aria-label="Certificate of achievement">
+        <div class="cx-frame">
+            @* Gold corner ornaments *@
+            @foreach (var corner in new[] { "tl", "tr", "bl", "br" })
+            {
+                <svg class="cx-corner @corner" viewBox="0 0 40 40" aria-hidden="true"><path d="M2 38V8a6 6 0 0 1 6-6h30M10 38V16a6 6 0 0 1 6-6h22" /></svg>
+            }
 
-        <div class="ip-cert-seal @(Model.IsVerified ? null : "self")">
-            <span class="ip-diamond @(Model.IsVerified ? "tone-1" : "")" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10" /></svg></span>
-            <span>@Model.VerifiedBy</span>
-        </div>
+            <header class="cx-top">
+                <span class="cx-brand">
+                    <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#0B5D3B" /><path d="M9 26c0-6 14-6 14-12S13 8 13 5" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" /><circle cx="13" cy="5" r="2.6" fill="#F0B43C" /></svg>
+                    Indlela
+                </span>
+                <span class="cx-no">Certificate code <b>@Model.ShortCode</b></span>
+            </header>
 
-        <dl class="ip-cert-meta">
-            <div><dt>Completed</dt><dd>@Model.CompletedAt.ToLocalTime().ToString("d MMMM yyyy")</dd></div>
-            <div><dt>Certificate</dt><dd>@Model.ShortCode</dd></div>
-            <div><dt>Verify at</dt><dd class="ip-cert-url">@Model.VerifyUrl</dd></div>
-        </dl>
-        <p class="ip-cert-disclaimer">Indlela recognition of learning. This is not an accredited qualification; accreditation, where it exists, is awarded by the course provider or SETA.</p>
-    </div>
-    <div class="ip-hero-strand" aria-hidden="true"></div>
-</article>
+            <div class="cx-main">
+                <p class="cx-kicker">Certificate of Achievement</p>
+                <p class="cx-small">This certificate is proudly presented to</p>
+                <h2 class="cx-name">@Model.LearnerName</h2>
+                <svg class="cx-rule" viewBox="0 0 400 12" aria-hidden="true"><path d="M0 6h170M230 6h170" /><path class="d" d="M200 1l5 5-5 5-5-5z" /><circle cx="182" cy="6" r="2" /><circle cx="218" cy="6" r="2" /></svg>
+                <p class="cx-small">for successfully completing the course</p>
+                <p class="cx-course">@Model.CourseTitle</p>
+                <p class="cx-small">offered by <b>@Model.Provider</b>@(Model.EstimatedHours is int h ? $" · about {h} hours of learning" : "")</p>
+            </div>
+
+            <footer class="cx-foot">
+                <div class="cx-sign">
+                    <span class="cx-sign-val">@completed</span>
+                    <span class="cx-sign-line"></span>
+                    <span class="cx-sign-lbl">Date completed</span>
+                </div>
+
+                <div class="cx-seal-col">
+                    <svg class="cx-seal" viewBox="0 0 120 120" aria-hidden="true">
+                        <defs>
+                            <path id="cx-arc-@Model.ShortCode" d="M60 60m-38 0a38 38 0 1 1 76 0a38 38 0 1 1 -76 0" />
+                        </defs>
+                        <circle class="s-teeth" cx="60" cy="60" r="54" />
+                        <circle class="s-disc" cx="60" cy="60" r="50" />
+                        <circle class="s-ring" cx="60" cy="60" r="44" />
+                        <circle class="s-ring" cx="60" cy="60" r="31" />
+                        <text class="s-arc"><textPath href="#cx-arc-@Model.ShortCode" startOffset="0" textLength="234" lengthAdjust="spacing">INDLELA · @sealWord · INDLELA · @sealWord ·</textPath></text>
+                        <path class="s-tick" d="M47 61l9 9 18-20" />
+                    </svg>
+                    <span class="cx-status">@Model.VerifiedBy</span>
+                </div>
+
+                <div class="cx-qr-col">
+                    <div class="cx-qr">@Html.Raw(Model.QrSvg)</div>
+                    <span class="cx-qr-lbl">Scan to verify</span>
+                </div>
+            </footer>
+
+            <p class="cx-disclaimer">Indlela recognition of learning, not an accredited qualification. Accreditation, where it exists, is awarded by the course provider or SETA. Check it at <span class="cx-url">@Model.VerifyUrl</span></p>
+        </div>
+    </article>
+</div>

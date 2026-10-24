@@ -44,6 +44,10 @@ public class LearnerEnrollment
     /// <summary>Source of the entry that reached 100% — decides whether completion counts as verified.</summary>
     public ProgressSource? CompletionSource { get; set; }
 
+    /// <summary>Public certificate code, e.g. "K7QM-4XPA-9T". Random (not guessable), created when the certificate is first shown.</summary>
+    [MaxLength(12)]
+    public string? CertificateCode { get; set; }
+
     public ICollection<ProgressEntry> ProgressEntries { get; set; } = new List<ProgressEntry>();
 
     public bool IsCompleted => CompletedAt is not null;

@@ -14,6 +14,35 @@ public static class SeedData
     public const string AdminRole = "Admin";
     public const string LearnerRole = "Learner";
 
+    /// <summary>Real mode: hides anything the demo seeded earlier. Courses are unpublished (never deleted, so learner history stays).</summary>
+    public static async Task HideDemoContentAsync(IServiceProvider services)
+    {
+        using var scope = services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<IndlelaDbContext>();
+
+        var demoCourses = await db.Courses
+            .Where(c => c.IsPublished && (c.Provider.StartsWith("Demo ") || c.OriginalUrl.Contains("example.") || c.OriginalUrl.StartsWith("/demo-provider/")))
+            .ToListAsync();
+        // Courses a roadmap lesson uses (e.g. the C# course) become Indlela Academy courses instead of being hidden.
+        var lessonCourseIds = await db.RoadmapSteps.Where(s => s.CourseId != null).Select(s => s.CourseId!.Value).ToListAsync();
+        foreach (var c in demoCourses)
+        {
+            if (lessonCourseIds.Contains(c.Id))
+            {
+                c.Provider = "Indlela Academy"; c.OriginalUrl = "/paths";
+                c.AccreditationBody = null; c.IsAccredited = false; c.NqfLevel = null; c.Credits = null;
+            }
+            else c.IsPublished = false;
+        }
+
+        var demoNews = await db.TechPulseArticles
+            .Where(a => a.Title.StartsWith("Demo:") || a.SourceName == "Demo News")
+            .ToListAsync();
+        db.TechPulseArticles.RemoveRange(demoNews);
+
+        await db.SaveChangesAsync();
+    }
+
     public static async Task InitialiseAsync(IServiceProvider services, bool seedDemoContent)
     {
         using var scope = services.CreateScope();

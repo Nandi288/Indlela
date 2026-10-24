@@ -21,6 +21,8 @@
     <title>@(string.IsNullOrEmpty(title) ? "Indlela — learn free, prove it, get hired" : $"{title} · Indlela")</title>
     <meta name="description" content="Indlela turns free learning into proven skills and real job opportunities for South Africans." />
     <meta name="theme-color" content="#0A2A20" />
+    @* Apply the learner's saved light/dark choice before the page paints (dark is the default). *@
+    <script>try { var m = localStorage.getItem('indlela-mode'); if (m === 'light' || m === 'dark') document.documentElement.setAttribute('data-theme', m); } catch (e) { }</script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=DM+Sans:wght@400;500;700&display=swap" />
@@ -73,6 +75,10 @@
 
             <div class="ix-actions">
                 @await RenderSectionAsync("TopBar", required: false)
+                <button type="button" class="ix-mode" data-theme-toggle aria-label="Switch to light mode" title="Light / dark mode">
+                    <svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5" /><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8" /></svg>
+                    <svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" /></svg>
+                </button>
                 @if (signedIn)
                 {
                     <a class="ix-user" href="/portfolio" title="My portfolio">

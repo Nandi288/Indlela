@@ -112,9 +112,7 @@ public class AuthApiController(
         await users.AddToRoleAsync(user, SeedData.LearnerRole);
         var link = await BuildConfirmationLinkAsync(user);
         await email.SendAsync(user.Email!, "Verify your Indlela account",
-            $"<p>Sawubona {HtmlEncoder.Default.Encode(user.FirstName)},</p>" +
-            $"<p>Tap to verify your email (link valid for 24 hours):</p>" +
-            $"<p><a href=\"{HtmlEncoder.Default.Encode(link)}\">Verify my email</a></p>");
+            AccountController.VerificationEmailBody(user.FirstName, link));
 
         logger.LogInformation("New learner registered from the mobile app: {UserId}", user.Id);
         return Ok(new RegisterResponse(

@@ -22,7 +22,6 @@
             <p class="ip-hero-text" style="margin:0 0 8px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#F2C54A">@c.Category · @c.Provider</p>
             <h1 id="course-title" class="ip-hero-title">@c.Title</h1>
             <div class="ip-course-pills" style="margin-top:14px">
-                <span class="ip-pill">@(c.NqfLevel is int n ? $"NQF {n}" : "Non-accredited")</span>
                 @if (c.IsFree)
                 {
                     <span class="ip-pill ip-pill-gold">Free</span>
@@ -48,7 +47,6 @@
                 <dl class="ip-facts">
                     <dt>Provider</dt><dd>@c.Provider</dd>
                     <dt>Category</dt><dd>@c.Category</dd>
-                    <dt>NQF level</dt><dd>@(c.NqfLevel?.ToString() ?? "Not stated")</dd>
                     @if (c.Credits is int credits)
                     {
                         <dt>Credits</dt><dd>@credits</dd>

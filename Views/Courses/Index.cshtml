@@ -33,10 +33,10 @@
         <div class="ip-hero-strand" aria-hidden="true"></div>
         <div class="ip-hero-body">
             <h2 id="find-title" class="ip-hero-title">Find your next bead on the path</h2>
-            <p class="ip-hero-text">Every course here is free. Filter by NQF level, provider or topic, then learn here or continue on the provider's site.</p>
+            <p class="ip-hero-text">Every course here is free. Filter by provider or topic, then learn here or continue on the provider's site.</p>
             <div class="ip-hero-search" role="search">
                 <label for="q" class="sr-only">Keywords</label>
-                <input id="q" type="search" name="q" value="@f.Q" placeholder="Try: C# beginner, cloud, NQF 5" autocomplete="off" />
+                <input id="q" type="search" name="q" value="@f.Q" placeholder="Try: C# beginner, cloud, web" autocomplete="off" />
                 <button type="submit" class="ip-btn ip-btn-gold ip-btn-big">Search</button>
             </div>
             @if (Model.Categories.Count > 0)
@@ -56,17 +56,6 @@
         @* ---------- Filters ---------- *@
         <section class="ip-card ip-filters" aria-labelledby="filters-title">
             <h2 id="filters-title">Filter courses</h2>
-
-            <div class="field">
-                <label for="nqf">NQF level</label>
-                <select id="nqf" name="nqf">
-                    <option value="">Any level</option>
-                    @for (var level = 1; level <= 10; level++)
-                    {
-                        <option value="@level" selected="@(f.Nqf == level)">NQF @level</option>
-                    }
-                </select>
-            </div>
 
             <div class="field">
                 <label for="category">Category</label>
@@ -103,7 +92,7 @@
                 <label for="accredited">Accreditation</label>
                 <select id="accredited" name="accredited">
                     <option value="">Accredited or not</option>
-                    <option value="true" selected="@(f.Accredited == true)">Accredited (NQF / SETA)</option>
+                    <option value="true" selected="@(f.Accredited == true)">Accredited (by a named body)</option>
                     <option value="false" selected="@(f.Accredited == false)">Non-accredited</option>
                 </select>
             </div>

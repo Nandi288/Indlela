@@ -17,7 +17,6 @@ public record CourseCardVm(
     int? EstimatedHours,
     bool IsFree)
 {
-    public string NqfLabel => NqfLevel is int n ? $"NQF {n}" : "Non-accredited";
     public bool LearnHere => DeliveryMode == DeliveryMode.InApp;
 }
 

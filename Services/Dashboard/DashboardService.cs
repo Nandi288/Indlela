@@ -25,7 +25,7 @@ public sealed class DashboardService(IndlelaDbContext db, ITechPulseService tech
     {
         var user = await db.Users.AsNoTracking()
             .Where(u => u.Id == userId)
-            .Select(u => new { u.FirstName, u.TargetSaqaNqfLevel })
+            .Select(u => new { u.FirstName })
             .SingleAsync(ct);
 
         // 1. Every enrollment the learner hasn't abandoned, with the course fields the page shows.
@@ -87,7 +87,7 @@ public sealed class DashboardService(IndlelaDbContext db, ITechPulseService tech
         return new PathDashboardVm
         {
             FirstName = user.FirstName,
-            GoalLabel = user.TargetSaqaNqfLevel is int nqf ? $"NQF {nqf} goal" : "Your goal",
+            GoalLabel = "Your path",
             Stops = stops,
             PathFillPercent = fill,
             AveragePercent = enrolledForAverage.Count == 0 ? null : (int)Math.Round(enrolledForAverage.Average(c => c.Percentage)),

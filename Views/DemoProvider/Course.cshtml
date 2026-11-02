@@ -22,10 +22,6 @@
         <p>@c.Description</p>
     }
     <ul class="chips" aria-label="Course details">
-        @if (c.NqfLevel is int n)
-        {
-            <li>NQF @n</li>
-        }
         @if (c.AccreditationBody is { } body)
         {
             <li>@body</li>

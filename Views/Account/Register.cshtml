@@ -73,17 +73,6 @@
                 <textarea asp-for="CareerGoal" rows="2" placeholder="e.g. Junior .NET developer, cloud support technician"></textarea>
                 <p class="ip-hint">We use this to recommend courses.</p>
             </div>
-            <div class="field">
-                <label asp-for="TargetSaqaNqfLevel"></label>
-                <select asp-for="TargetSaqaNqfLevel">
-                    <option value="">Not sure yet</option>
-                    @for (var level = 1; level <= 10; level++)
-                    {
-                        <option value="@level">NQF @level</option>
-                    }
-                </select>
-                <p class="ip-hint">This becomes the goal diamond at the end of your path.</p>
-            </div>
         </fieldset>
 
         <fieldset class="ip-fieldset">

@@ -317,8 +317,9 @@ html[data-theme="light"] .ix-mode .moon { display: block; }
 .cx-url { overflow-wrap: anywhere; }
 
 @media print {
+  html, body, .ix, .ix-main, .ix-main-full, .app-content, .ip-page { background: #fff !important; }
   .cx-wrap { max-width: none; width: 262mm; }
   .cx-wrap + p, .ix-main > .ip-page > .ip-note { display: none; }
-  .cx { box-shadow: none; }
+  .cx { box-shadow: none; background: #FFFDF7 !important; background-image: none !important; color: #17201B !important; }
   .cx, .cx * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }

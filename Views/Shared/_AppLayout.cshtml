@@ -18,7 +18,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>@(string.IsNullOrEmpty(title) ? "Indlela — learn free, prove it, get hired" : $"{title} · Indlela")</title>
+    <title>@(string.IsNullOrEmpty(title) ? "Indlela — learn free, prove it, apply with confidence" : $"{title} · Indlela")</title>
     <meta name="description" content="Indlela turns free learning into proven skills and real job opportunities for South Africans." />
     <meta name="theme-color" content="#0A2A20" />
     @* Apply the learner's saved light/dark choice before the page paints (dark is the default). *@
@@ -58,15 +58,13 @@
                         <a href="/paths" aria-current="@Current("/paths", "/courses", "/learn")">Discover</a>
                         <a href="/portfolio" aria-current="@Current("/portfolio", "/p/")">Portfolio</a>
                         <a href="/jobs" aria-current="@Current("/jobs")">Jobs</a>
+                        <a href="/tech-pulse" aria-current="@Current("/tech-pulse")">Tech Pulse</a>
                         <a href="/badges" aria-current="@Current("/badges")">Badges</a>
-                        @if (User.IsInRole("Admin"))
-                        {
-                            <a href="/admin" aria-current="@Current("/admin")">Admin</a>
-                        }
                     }
                     else
                     {
                         <a href="/paths" aria-current="@Current("/paths", "/courses")">Discover</a>
+                        <a href="/tech-pulse" aria-current="@Current("/tech-pulse")">Tech Pulse</a>
                         <a href="/badges" aria-current="@Current("/badges")">Badges</a>
                         <a href="/jobs" aria-current="@Current("/jobs")">Jobs</a>
                         <a href="/about" aria-current="@Current("/about")">About Us</a>

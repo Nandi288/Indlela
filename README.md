@@ -1,39 +1,28 @@
 # Indlela
 
-Free Digital Learning Aggregator & Engagement Engine — ASP.NET Core 8 MVC, EF Core + SQL Server, ASP.NET Core Identity.
-Design: **Option 1 "Imbizo" (civic light)**.
+Indlela is a free web app that helps young South Africans learn a skill, prove it, and apply for jobs that need it. Learners follow a roadmap, work through free courses, build verified proof of their skills, and get certificates with QR codes that employers can scan.
 
-## Run it
+Built by DOTNET NINJAS (Durban University of Technology) for the FNB App of the Year Hackathon 2026 under the Youth Employment and Work Readiness challenge.
 
-```bash
-dotnet restore
-dotnet ef migrations add InitialCreate   # needs: dotnet tool install --global dotnet-ef
-dotnet run
-```
+Live site: https://indlela-theway-c5ewandbgbd4g0fe.southafricanorth-01.azurewebsites.net
 
-- Connection string `IndlelaDb` in `appsettings.json` points to LocalDB. For Azure SQL, set it with user secrets or app settings.
-- In Development the app creates the schema and seeds **demo** courses, providers, badges and Tech Pulse items (all fictional, on example.* domains).
-- No email service is wired up. In Development the verification link is shown on the "Check your email" page.
-- Tech Pulse: add `News:ApiKey` (NewsAPI.org) via user secrets. Without it the page serves stored items.
-- SQL Server full-text search: run `Data/Sql/FullTextIndex.sql`, then set `Search:UseFullText` to `true`. LocalDB has no full-text support, so the default uses indexed `LIKE`.
-- Data-protection keys go to `./keys` (git-ignored). They encrypt the ID/passport column, so **back them up**. On Azure, move them to Blob Storage + Key Vault.
 
-## Where the use cases live
+## Features
 
-| Use case | Code |
-|---|---|
-| UC-01/02 Register, log in, lockout | `Controllers/AccountController.cs`, `Program.cs` (Identity options) |
-| UC-04/05 Catalogue, search, filters, paging | `Services/Catalog/CourseCatalogService.cs`, `CoursesController.Index` |
-| UC-07 Course details + earnable badges | `CoursesController.Details` |
-| UC-13/14/15 Smart handoff | `Services/Handoff/*` (DeepLink, Extension simulation, Manual) |
-| UC-16 Confirm enrollment | `CoursesController.ConfirmEnrollment` |
-| UC-17 Progress ledger | `Services/Progress/ProgressService.cs`, `ProgressionController.UpdateProgress` |
-| UC-18 Dashboard | `ProgressionController.Dashboard` |
-| UC-22/23/24 Tech Pulse (6 h cache, skill chips) | `Services/TechPulse/*`, `TechPulseController` |
-| UC-31 Badge engine | `Services/Progress/BadgeEngine.cs` |
+- **Smart Start:** six questions recommend one of three roadmaps (Software Development, Digital Marketing, Accounting and Finance), with reasons and time needed.
+- **Learning:** text-first lessons with short quizzes, plus links to free provider courses.
+- **My path dashboard:** progress, streaks, badges, and a Forecast of the finish date.
+- **Proof:** verified skills, certificates with short codes and QR codes, and a public verify page.
+- **Portfolio and CV:** a public portfolio and a one-column, ATS-friendly CV.
+- **Job matching:** nine entry-level roles, with match percentages and missing skills.
+- **Tech Pulse:** South African tech news from RSS feeds, refreshed every six hours.
 
-## Not built yet
+Indlela is not an accredited provider. Certificates are recognition of learning, not accredited qualifications.
 
-These are the next pieces, in suggested order: password reset and profile/consent editing (UC-02 1a, UC-03), the in-app lesson player and quizzes (UC-28/29), and Hangfire jobs (UC-16 reminders, UC-20 nudges). After that come the extension API with single-use tokens (UC-15), provider sync (UC-30/33) and the admin area (UC-08/11/12/32).
+## Tech stack
 
-Learner-submitted progress is always recorded as **Self-reported**. Verified `InApp` and `ProviderSync` progress can only be written server-side through `IProgressService`, so learners can't award themselves verified badges.
+- ASP.NET Core 8 MVC (C#), Razor views
+- Entity Framework Core 8 with SQL Server / Azure SQL
+- ASP.NET Core Identity (email verification, account lockout)
+- Background refresh service for RSS news
+- Hosted on Microsoft Azure App Service
